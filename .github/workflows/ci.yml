@@ -23,3 +23,6 @@ jobs:
       - run: npm run test
       - run: npm run format:check
       - run: npm run build -w site
+      # GitHub runs the committed bundle, so it must be exactly what the source builds.
+      - run: npm run build -w action
+      - run: git diff --exit-code -- action/dist
