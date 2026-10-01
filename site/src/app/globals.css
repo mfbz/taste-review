@@ -1,0 +1,148 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+/* The page alternates paper and ink bands rather than switching themes, so
+   shadcn's dark styles apply inside an ink or void band. */
+@custom-variant dark (&:is([data-band="ink"] *, [data-band="void"] *));
+
+@theme inline {
+  --font-sans: var(--font-figtree);
+  --font-heading: var(--font-figtree);
+  --font-mono: var(--font-azeret-mono);
+  /* Azeret's fi ligature reads as a dotless i in a label. */
+  --font-mono--font-feature-settings: "liga" 0, "calt" 0;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-link: var(--link);
+  --color-rise: var(--rise);
+  --color-drop: var(--drop);
+
+  --color-paper: #f5f7f2;
+  --color-paper-2: #eaece7;
+  --color-ink: #1e1e1e;
+  --color-ink-2: #272726;
+  --color-void: #111111;
+
+  --radius-sm: calc(var(--radius) * 0.5);
+  --radius-md: calc(var(--radius) * 0.75);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.5);
+
+  --text-display: clamp(2.25rem, 1.5rem + 2.5vw, 3.25rem);
+  --text-display--line-height: 1.08;
+  --text-display--letter-spacing: -0.02em;
+  --text-title: clamp(1.75rem, 1.5rem + 1vw, 2.25rem);
+  --text-title--line-height: 1.2;
+  --text-title--letter-spacing: -0.01em;
+  --text-subtitle: clamp(1.2rem, 1.1rem + 0.4vw, 1.4rem);
+  --text-subtitle--line-height: 1.25;
+  --text-body: clamp(1rem, 0.97rem + 0.15vw, 1.1rem);
+  --text-body--line-height: 1.5;
+  --text-small: clamp(0.875rem, 0.85rem + 0.1vw, 0.9375rem);
+  --text-small--line-height: 1.45;
+  --text-label: 0.8125rem;
+  --text-label--line-height: 1.4;
+  --text-tag: 0.75rem;
+  --text-tag--line-height: 1;
+
+  --container-canvas: 80rem;
+}
+
+/* Paper is the default band: off-white canvas, charcoal type, link blue as the only accent. */
+:root,
+[data-band="paper"] {
+  --background: #f5f7f2;
+  --foreground: #1e1e1e;
+  --card: #ffffff;
+  --card-foreground: #1e1e1e;
+  --popover: #ffffff;
+  --popover-foreground: #1e1e1e;
+  --primary: #1e1e1e;
+  --primary-foreground: #f5f7f2;
+  --secondary: #eaece7;
+  --secondary-foreground: #1e1e1e;
+  --muted: #eaece7;
+  --muted-foreground: #666562;
+  --accent: #eaece7;
+  --accent-foreground: #1e1e1e;
+  --destructive: #c4321a;
+  --border: #0000001a;
+  --input: #00000026;
+  --ring: #0000ee;
+  --link: #0000ee;
+  --rise: #0000ee;
+  --drop: #c4321a;
+  --radius: 0.5rem;
+}
+
+/* Ink and void are the two dark bands; blue fails contrast on them, so the accent turns paper. */
+[data-band="ink"],
+[data-band="void"] {
+  --background: #1e1e1e;
+  --foreground: #f5f7f2;
+  --card: #272726;
+  --card-foreground: #f5f7f2;
+  --popover: #272726;
+  --popover-foreground: #f5f7f2;
+  --primary: #f5f7f2;
+  --primary-foreground: #1e1e1e;
+  --secondary: #272726;
+  --secondary-foreground: #f5f7f2;
+  --muted: #272726;
+  --muted-foreground: #959595;
+  --accent: #272726;
+  --accent-foreground: #f5f7f2;
+  --destructive: #ff4c24;
+  --border: #ffffff1a;
+  --input: #ffffff4d;
+  --ring: #f5f7f2;
+  --link: #f5f7f2;
+  --rise: #8fa8ff;
+  --drop: #ff4c24;
+}
+
+[data-band="void"] {
+  --background: #111111;
+  --card: #1e1e1e;
+  --secondary: #1e1e1e;
+  --muted: #1e1e1e;
+  --accent: #1e1e1e;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    @apply bg-background font-sans text-body font-light text-foreground antialiased;
+    -webkit-tap-highlight-color: transparent;
+  }
+  [data-band] {
+    @apply bg-background text-foreground;
+  }
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+  ::selection {
+    @apply bg-link text-background;
+  }
+}

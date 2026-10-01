@@ -1,0 +1,42 @@
+name: taste review
+description: Score a pull request's Vercel preview against your live site's brand with the Taste Engine, on request.
+author: mfbz
+branding:
+  icon: check-circle
+  color: gray-dark
+
+inputs:
+  taste-api-key:
+    description: Your Taste Engine API key. Pass it from a secret, never inline.
+    required: true
+  reference-url:
+    description: The live page whose brand is the standard, usually your production home page. Production pages are read from the same origin.
+    required: true
+  paths:
+    description: The pages to check, comma or space separated. A /taste review comment can name its own.
+    required: false
+    default: /
+  margin:
+    description: The smallest drop against production, from 0 to 1, that the comment flags and that turns the check neutral.
+    required: false
+    default: "0.05"
+  timeout-minutes:
+    description: How long to wait for each page's verdict.
+    required: false
+    default: "15"
+  preview-wait-minutes:
+    description: How long to wait for the Vercel preview to finish deploying.
+    required: false
+    default: "10"
+  preview-environment:
+    description: The Vercel deployment environment to score, such as "Preview – web", when one repository deploys several projects. Empty takes the newest preview.
+    required: false
+    default: ""
+  github-token:
+    description: The token used to comment and report the check. Keep the default, since the comment is found again by its author, github-actions[bot].
+    required: false
+    default: ${{ github.token }}
+
+runs:
+  using: node24
+  main: action/dist/index.js
