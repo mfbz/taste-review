@@ -21,7 +21,7 @@ export const STEPS = [
   },
   {
     title: "One comment, fixes included",
-    body: "The score, the change against production and the worst problems first, plus the fixes as structured data your coding agent applies in one pass. Push, ask again, and the same comment updates.",
+    body: "The score, the change against production and the worst problems first, plus the fixes as structured data your coding agent applies in one pass. Push, ask again, and the next comment shows how far each page moved.",
   },
 ] as const;
 

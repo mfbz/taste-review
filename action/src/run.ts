@@ -2,7 +2,14 @@ import { canPush } from "./access.ts";
 import type { CheckConclusion, CheckOutput, GitHubApi } from "./github-api.ts";
 import { MAX_PAGES, type Inputs } from "./inputs.ts";
 import { waitForPreview } from "./preview.ts";
-import { MARKER, outcome, renderNotice, renderReport } from "./render-comment.ts";
+import {
+  MARKER,
+  outcome,
+  parseScores,
+  renderNotice,
+  renderReport,
+  type ScoreRecord,
+} from "./render-comment.ts";
 import { reviewPages, type PageReview } from "./review-pages.ts";
 import { TasteError, type TasteClient } from "./taste-client.ts";
 import type { Trigger } from "./trigger.ts";
@@ -18,7 +25,7 @@ export type RunDeps = {
   now: () => number;
 };
 
-// The comment found again on the next run is the one this workflow's default token wrote.
+// Earlier reviews are read back only from comments this workflow's default token wrote.
 const BOT_LOGIN = "github-actions[bot]";
 const BLOCKED_MESSAGE = {
   auth: "The Taste Engine refused the key. Check the TASTE_API_KEY secret.",
@@ -29,13 +36,17 @@ function errorText(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
 
-async function upsertComment(api: GitHubApi, prNumber: number, body: string): Promise<void> {
-  const existing = (await api.listComments(prNumber)).find(
+// The newest earlier review that scored something, so each comment shows the change since the last.
+async function lastReview(api: GitHubApi, prNumber: number): Promise<ScoreRecord | null> {
+  const ours = (await api.listComments(prNumber)).filter(
     (comment) =>
       comment.login === BOT_LOGIN && comment.userType === "Bot" && comment.body.startsWith(MARKER),
   );
-  if (existing) await api.updateComment(existing.id, body);
-  else await api.createComment(prNumber, body);
+  for (const comment of ours.reverse()) {
+    const record = parseScores(comment.body);
+    if (record) return record;
+  }
+  return null;
 }
 
 function pagesFor(trigger: Trigger, inputs: Inputs): { paths: string[]; notices: string[] } {
@@ -89,7 +100,7 @@ export async function run(deps: RunDeps): Promise<void> {
     await api.addEyes(trigger.commentId).catch(() => log("Could not react to the comment."));
     if (trigger.paths.length === 0 && trigger.rejected.length > 0) {
       const message = `Nothing checked: ${trigger.rejected.join(", ")} is not a page. Name pages as paths, like /taste review /pricing.`;
-      await upsertComment(api, pr.number, renderNotice(pr.headSha, inputs.referenceUrl, message));
+      await api.createComment(pr.number, renderNotice(pr.headSha, inputs.referenceUrl, message));
       return;
     }
   }
@@ -104,7 +115,7 @@ export async function run(deps: RunDeps): Promise<void> {
   // The check completes even when the comment cannot be written, so it never hangs in progress.
   const report = async (body: string, conclusion: CheckConclusion, output: CheckOutput) => {
     try {
-      await upsertComment(api, pr.number, body);
+      await api.createComment(pr.number, body);
     } catch (error) {
       log(`Could not write the comment: ${errorText(error)}`);
     } finally {
@@ -154,7 +165,12 @@ export async function run(deps: RunDeps): Promise<void> {
       await notice(blocked);
       return;
     }
+    const previous = await lastReview(api, pr.number).catch((error: unknown) => {
+      log(`Could not read earlier reviews: ${errorText(error)}`);
+      return null;
+    });
     const result = {
+      previous,
       sha: pr.headSha,
       referenceUrl: inputs.referenceUrl,
       margin: inputs.margin,

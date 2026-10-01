@@ -1,6 +1,11 @@
+import { z } from "zod";
+
 import { escapeMarkdown, fence } from "./escape-markdown.ts";
 import type { CheckConclusion, CheckOutput } from "./github-api.ts";
 import type { PageReview } from "./review-pages.ts";
+
+// The preview scores of one review, carried in its comment so the next review can show the change.
+export type ScoreRecord = z.infer<typeof ScoreRecordSchema>;
 
 export type Report = {
   sha: string;
@@ -8,12 +13,18 @@ export type Report = {
   margin: number;
   pages: PageReview[];
   notices: string[];
+  previous: ScoreRecord | null;
 };
 
 export type Outcome = { conclusion: CheckConclusion; output: CheckOutput };
 
-// Only a comment carrying this marker and written by the workflow's own bot is edited in place.
+// Only a comment carrying this marker and written by the workflow's own bot is read back.
 export const MARKER = "<!-- taste-review -->";
+const SCORES_PREFIX = "<!-- taste-review:scores ";
+const ScoreRecordSchema = z.object({
+  sha: z.string().regex(/^[0-9a-f]{7,40}$/),
+  scores: z.record(z.string().max(200), z.number().min(0).max(1)),
+});
 const RECOMMENDATIONS_PER_PAGE = 5;
 const RECOMMENDATION_CHARS = 500;
 // GitHub refuses a comment past 65,536 characters; the fixes are the only part that can grow that far.
@@ -42,9 +53,44 @@ function change(page: PageReview, margin: number): string {
   return "steady";
 }
 
-function header(sha: string, referenceUrl: string): string {
+function sinceLast(page: PageReview, previous: ScoreRecord, margin: number): string {
+  const before = previous.scores[page.path];
+  if (page.preview === null) return "·";
+  if (before === undefined) return "first review";
+  const value = page.preview - before;
+  if (value <= -margin) return `▼ ${Math.abs(value).toFixed(2)} from ${before.toFixed(2)}`;
+  if (value >= margin) return `▲ ${value.toFixed(2)} from ${before.toFixed(2)}`;
+  return `steady from ${before.toFixed(2)}`;
+}
+
+function header(sha: string, referenceUrl: string, previous: ScoreRecord | null = null): string {
   const reference = escapeMarkdown(new URL(referenceUrl).host);
-  return `${MARKER}\n### Taste review\n\nChecked \`${sha.slice(0, 7)}\` against the brand of ${reference}.`;
+  const since = previous
+    ? ` Compared with the last review at \`${previous.sha.slice(0, 7)}\`.`
+    : "";
+  return `${MARKER}\n### Taste review\n\nChecked \`${sha.slice(0, 7)}\` against the brand of ${reference}.${since}`;
+}
+
+// Paths are validated site paths and the sha is hex, so the JSON can never close the HTML comment.
+function scoresLine(report: Report): string {
+  const scores: Record<string, number> = {};
+  for (const page of report.pages) if (page.preview !== null) scores[page.path] = page.preview;
+  return `${SCORES_PREFIX}${JSON.stringify({ sha: report.sha, scores })} -->`;
+}
+
+export function parseScores(body: string): ScoreRecord | null {
+  const start = body.indexOf(SCORES_PREFIX);
+  if (start === -1) return null;
+  const end = body.indexOf(" -->", start);
+  if (end === -1) return null;
+  try {
+    const parsed = ScoreRecordSchema.safeParse(
+      JSON.parse(body.slice(start + SCORES_PREFIX.length, end)),
+    );
+    return parsed.success ? parsed.data : null;
+  } catch {
+    return null;
+  }
 }
 
 function dropped(report: Report): PageReview[] {
@@ -84,15 +130,24 @@ function agentBlock(report: Report): string {
 }
 
 export function renderReport(report: Report): string {
-  const rows = report.pages.map(
-    (page) =>
-      `| \`${page.path}\` | ${score(page.production)} | ${score(page.preview)} | ${change(page, report.margin)} |`,
-  );
-  const table = [
-    "| Page | Production | Preview | Change |",
-    "| --- | ---: | ---: | --- |",
-    ...rows,
-  ];
+  const previous = report.previous;
+  const rows = report.pages.map((page) => {
+    const cells = [
+      `\`${page.path}\``,
+      score(page.production),
+      score(page.preview),
+      change(page, report.margin),
+      ...(previous ? [sinceLast(page, previous, report.margin)] : []),
+    ];
+    return `| ${cells.join(" | ")} |`;
+  });
+  const table = previous
+    ? [
+        "| Page | Production | Preview | Change | Since last review |",
+        "| --- | ---: | ---: | --- | --- |",
+        ...rows,
+      ]
+    : ["| Page | Production | Preview | Change |", "| --- | ---: | ---: | --- |", ...rows];
   const worst = [...report.pages]
     .filter((page) => (page.verdict?.recommendations.length ?? 0) > 0)
     .sort((a, b) => (a.preview ?? 1) - (b.preview ?? 1));
@@ -102,12 +157,12 @@ export function renderReport(report: Report): string {
   const notices = report.notices.map((notice) => `- ${escapeMarkdown(notice)}`);
 
   return [
-    header(report.sha, report.referenceUrl),
+    `${header(report.sha, report.referenceUrl, previous)}\n${scoresLine(report)}`,
     table.join("\n"),
     [...notices, ...problems].join("\n"),
     worst.map(recommendations).join("\n\n"),
     agentBlock(report),
-    "<sub>Scores run from 0 to 1. Push your fixes and comment <code>/taste review</code> to check again.</sub>",
+    "<sub>Scores run from 0 to 1. Push your fixes and comment <code>/taste review</code> to check again; each review is a new comment.</sub>",
   ]
     .filter(Boolean)
     .join("\n\n");

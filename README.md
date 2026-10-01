@@ -10,7 +10,7 @@ Built on the [Taste Engine API](https://docs.tastelabs.com). An independent proj
 
 1. **You ask.** When the UI feels done, someone who can push to the repository comments `/taste review` on the pull request, optionally with the pages to check (`/taste review /pricing /signup`). Nothing runs on a push.
 2. **The preview is scored.** The action finds the commit's Vercel preview through GitHub's deployments, checks each page loads, and sends it to the Taste Engine's brand-adherence verifier. The same page in production is judged against the same reference, so you see the change and not only a number.
-3. **One comment comes back.** A score per page, the change against production, the engine's recommendations worst first, and a collapsed block of structured fixes to paste into your coding agent. Push, ask again, and the same comment updates.
+3. **One comment comes back.** A score per page, the change against production, the engine's recommendations worst first, and a collapsed block of structured fixes to paste into your coding agent. Push, ask again, and a new comment shows the scores beside the last review's, so the pull request keeps the history.
 
 A check named **Taste review** follows the same run. It is green when every page held steady and neutral when a page dropped past the margin or something went wrong. It never fails, so it can never block a merge.
 

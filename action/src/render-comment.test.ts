@@ -1,6 +1,14 @@
 import { describe, expect, it } from "vitest";
 
-import { MARKER, outcome, renderNotice, renderReport, type Report } from "./render-comment.ts";
+import {
+  MARKER,
+  outcome,
+  parseScores,
+  renderNotice,
+  renderReport,
+  type Report,
+  type ScoreRecord,
+} from "./render-comment.ts";
 import type { PageReview } from "./review-pages.ts";
 
 function page(overrides: Partial<PageReview> & { path: string }): PageReview {
@@ -15,8 +23,13 @@ function page(overrides: Partial<PageReview> & { path: string }): PageReview {
   };
 }
 
-function report(pages: PageReview[], notices: string[] = []): Report {
+function report(
+  pages: PageReview[],
+  notices: string[] = [],
+  previous: ScoreRecord | null = null,
+): Report {
   return {
+    previous,
     sha: "a1b2c3d4e5",
     referenceUrl: "https://www.example.com",
     margin: 0.05,
@@ -153,6 +166,43 @@ describe("renderReport", () => {
     );
     expect(body).toContain("| `/gone` | · | · | Not found on the preview. |");
     expect(body).toContain("- Checked the first 5 of 7 pages; ask again for the rest.");
+  });
+});
+
+describe("review history", () => {
+  it("carries its preview scores so the next review can read them back", () => {
+    const body = renderReport(
+      report([
+        page({ path: "/pricing", preview: 0.35 }),
+        page({ path: "/gone", preview: null, verdict: null, problem: "x" }),
+      ]),
+    );
+    expect(parseScores(body)).toEqual({ sha: "a1b2c3d4e5", scores: { "/pricing": 0.35 } });
+  });
+
+  it("adds the change since the last review", () => {
+    const body = renderReport(
+      report([page({ path: "/pricing", preview: 0.9 }), page({ path: "/new", preview: 0.8 })], [], {
+        sha: "80fa1ef",
+        scores: { "/pricing": 0.35 },
+      }),
+    );
+    expect(body).toContain("Compared with the last review at `80fa1ef`.");
+    expect(body).toContain("| Page | Production | Preview | Change | Since last review |");
+    expect(body).toContain("▲ 0.55 from 0.35 |");
+    expect(body).toContain("first review |");
+  });
+
+  it("leaves the column out on the first review", () => {
+    expect(renderReport(report([page({ path: "/" })]))).not.toContain("Since last review");
+  });
+
+  it("ignores scores that are malformed or out of range", () => {
+    const line = (json: string) => `${MARKER}\n<!-- taste-review:scores ${json} -->`;
+    expect(parseScores(line("{not json"))).toBeNull();
+    expect(parseScores(line('{"sha":"80fa1ef","scores":{"/":7}}'))).toBeNull();
+    expect(parseScores(line('{"sha":"not-a-sha","scores":{}}'))).toBeNull();
+    expect(parseScores("no scores here")).toBeNull();
   });
 });
 
