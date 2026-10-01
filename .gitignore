@@ -1,0 +1,24 @@
+# dependencies
+node_modules/
+
+# next.js
+.next/
+out/
+next-env.d.ts
+*.tsbuildinfo
+
+# testing
+coverage/
+
+# secrets: the Taste Engine key lives in .env and never leaves this machine
+.env*
+!.env.example
+
+# raw API responses, kept local: they carry another site's captured HTML and assets
+.cache/
+
+# misc
+.DS_Store
+*.pem
+npm-debug.log*
+.vercel
