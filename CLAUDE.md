@@ -55,7 +55,8 @@ This repository is public.
 
 ## Git workflow
 
-- `main` is released by hand from `develop`. Work happens on a branch per change (`feat/…`, `fix/…`, `chore/…`, `docs/…`), merged into `develop` once its checks pass.
+- Work happens on a branch per change (`feat/…`, `fix/…`, `chore/…`, `docs/…`), merged into `develop` once its checks pass. `develop` reaches `main` through a pull request merged with a merge commit, never squashed, so the two histories stay one.
+- **Releases are automated by `.github/workflows/release.yml`**: a push to `main` whose `action/package.json` carries a version with no release yet gets the tag `vX.Y.Z`, a GitHub Release with generated notes, and the moving major tag (`v1`) on the same commit. Bumping that version on `develop`, following semver for the action's inputs and behaviour, is the only input; nothing is tagged by hand. Users write `@v1` for fixes without edits, or `@vX.Y.Z` to pin.
 - Commit messages are plain, imperative and say why. **No tool or agent attribution of any kind** (no "Co-Authored-By" lines for an agent, no "generated with" footers).
 
 ## Commands
