@@ -56,11 +56,20 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
+          # GitHub sometimes answers a push with a 500; three tries, 10 then 20 seconds apart.
+          push() {
+            for attempt in 1 2 3; do
+              git push "$@" && return 0
+              [ "$attempt" -lt 3 ] && sleep $((attempt * 10))
+            done
+            return 1
+          }
+
           if git rev-parse -q --verify "refs/tags/$TAG" > /dev/null; then
             echo "$TAG already exists on $(git rev-list -n 1 "$TAG")"
           else
             git tag -a "$TAG" -m "$TAG"
-            git push origin "$TAG"
+            push origin "$TAG"
           fi
 
           if gh release view "$TAG" > /dev/null 2>&1; then
@@ -71,4 +80,4 @@ jobs:
 
           # Only a new release moves the major tag, so a rerun never drags it backwards.
           git tag -fa "$MAJOR" "$TAG^{}" -m "$MAJOR"
-          git push -f origin "$MAJOR"
+          push -f origin "$MAJOR"
