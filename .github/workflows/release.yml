@@ -1,0 +1,74 @@
+name: Release
+
+# A push to main whose action/package.json carries a version with no release yet
+# tags it vX.Y.Z, publishes a GitHub Release with notes since the last one, and
+# moves the major tag (v1) to the same commit. Bumping the version is the only input.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Read the version
+        id: version
+        run: |
+          version="$(node -p "require('./action/package.json').version")"
+          if ! [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::action/package.json has version '$version', expected X.Y.Z"
+            exit 1
+          fi
+          echo "tag=v$version" >> "$GITHUB_OUTPUT"
+          echo "major=v${version%%.*}" >> "$GITHUB_OUTPUT"
+
+      # GitHub runs the committed bundle, so a release must never ship one that differs from the source.
+      - name: Check the bundle matches the source
+        run: |
+          npm ci
+          npm run build -w action
+          git diff --exit-code -- action/dist
+
+      - name: Tag, publish and move the major tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.version.outputs.tag }}
+          MAJOR: ${{ steps.version.outputs.major }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          if git rev-parse -q --verify "refs/tags/$TAG" > /dev/null; then
+            echo "$TAG already exists on $(git rev-list -n 1 "$TAG")"
+          else
+            git tag -a "$TAG" -m "$TAG"
+            git push origin "$TAG"
+          fi
+
+          if gh release view "$TAG" > /dev/null 2>&1; then
+            echo "Release $TAG already published; nothing to do."
+            exit 0
+          fi
+          gh release create "$TAG" --title "$TAG" --generate-notes --verify-tag --latest
+
+          # Only a new release moves the major tag, so a rerun never drags it backwards.
+          git tag -fa "$MAJOR" "$TAG^{}" -m "$MAJOR"
+          git push -f origin "$MAJOR"

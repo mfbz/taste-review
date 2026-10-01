@@ -103,6 +103,10 @@ npm run format:check
 
 CI runs the four checks, builds the site, and rebuilds the action to confirm the committed bundle matches the source.
 
+### Releasing
+
+Bump `version` in `action/package.json` and merge to `main`. The release workflow tags `vX.Y.Z`, publishes a GitHub Release with generated notes, and moves the major tag (`v1`) to the same commit, so `@v1` picks up the fix and `@vX.Y.Z` stays pinned. A merge that leaves the version alone releases nothing.
+
 ## License
 
 [MIT](LICENSE)
