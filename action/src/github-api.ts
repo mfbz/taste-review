@@ -16,7 +16,6 @@ export type GitHubApi = {
   listDeploymentStatuses(deploymentId: number): Promise<DeploymentStatus[]>;
   listComments(prNumber: number): Promise<IssueComment[]>;
   createComment(prNumber: number, body: string): Promise<void>;
-  updateComment(commentId: number, body: string): Promise<void>;
   startCheck(sha: string, output: CheckOutput): Promise<number>;
   finishCheck(checkId: number, conclusion: CheckConclusion, output: CheckOutput): Promise<void>;
 };
@@ -93,10 +92,6 @@ export function createGitHubApi(token: string, owner: string, repo: string): Git
 
     async createComment(prNumber, body) {
       await rest.issues.createComment({ ...base, issue_number: prNumber, body });
-    },
-
-    async updateComment(commentId, body) {
-      await rest.issues.updateComment({ ...base, comment_id: commentId, body });
     },
 
     async startCheck(sha, output) {

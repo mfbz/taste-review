@@ -39,7 +39,6 @@ function fakeGitHub(
   const state = {
     checks: [] as { id: number; sha: string; conclusion?: CheckConclusion; output: CheckOutput }[],
     created: [] as string[],
-    updated: [] as { id: number; body: string }[],
     eyes: 0,
   };
   const api: GitHubApi = {
@@ -65,9 +64,6 @@ function fakeGitHub(
     },
     async createComment(_number, body) {
       state.created.push(body);
-    },
-    async updateComment(id, body) {
-      state.updated.push({ id, body });
     },
     async startCheck(sha, output) {
       state.checks.push({ id: state.checks.length + 1, sha, output });
@@ -133,16 +129,20 @@ describe("run", () => {
     expect(github.state.checks[0]).toMatchObject({ sha: "abc1234def", conclusion: "neutral" });
   });
 
-  it("edits its own comment rather than adding another", async () => {
+  it("posts a new comment and compares it with the last review it wrote", async () => {
+    const scores = (sha: string, value: number) =>
+      `${MARKER}\n<!-- taste-review:scores {"sha":"${sha}","scores":{"/pricing":${value}}} -->`;
     const github = fakeGitHub({
       comments: [
-        { id: 5, body: `${MARKER}\nold`, login: "someone", userType: "User" },
-        { id: 6, body: `${MARKER}\nold`, login: "github-actions[bot]", userType: "Bot" },
+        { id: 4, body: scores("aaaaaaa", 0.2), login: "github-actions[bot]", userType: "Bot" },
+        { id: 5, body: scores("bbbbbbb", 0.35), login: "github-actions[bot]", userType: "Bot" },
+        { id: 6, body: scores("ccccccc", 0.99), login: "someone", userType: "User" },
       ],
     });
     await run(deps({ api: github.api, taste: fakeTaste(SCORES) }).value);
-    expect(github.state.created).toHaveLength(0);
-    expect(github.state.updated.map((update) => update.id)).toEqual([6]);
+    expect(github.state.created).toHaveLength(1);
+    expect(github.state.created[0]).toContain("Compared with the last review at `bbbbbbb`.");
+    expect(github.state.created[0]).toContain("▲ 0.36 from 0.35");
   });
 
   it("ignores someone who cannot push and spends nothing", async () => {

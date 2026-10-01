@@ -1,3 +1,4 @@
+export const SITE_URL = "https://taste-review-action.vercel.app";
 export const REPO_URL = "https://github.com/mfbz/taste-review";
 export const TASTE_DOCS_URL = "https://docs.tastelabs.com";
 export const TASTE_KEYS_URL = "https://engine.tastelabs.com/app/api-keys";
@@ -20,7 +21,7 @@ export const STEPS = [
   },
   {
     title: "One comment, fixes included",
-    body: "The score, the change against production and the worst problems first, plus the fixes as structured data your coding agent applies in one pass. Push, ask again, and the same comment updates.",
+    body: "The score, the change against production and the worst problems first, plus the fixes as structured data your coding agent applies in one pass. Push, ask again, and the next comment shows how far each page moved.",
   },
 ] as const;
 

@@ -20,7 +20,7 @@ Nothing crosses between `action/` and `site/`. If both need a fact, it is writte
 - **Only people who can push may spend.** A command from anyone else, or from a bot, is ignored.
 - **Never red.** The check is green or neutral, never failing: a brand score is advice, not a merge gate. A failure of ours (API down, no preview, out of credits) is a neutral check with the next step written on it.
 - **Verdict text is untrusted.** Recommendations describe a page built from the pull request's own code, so everything posted is escaped: no live @mentions, issue references, links or HTML.
-- **One comment per pull request**, found by a hidden marker and edited in place, and only if `github-actions[bot]` wrote it.
+- **One new comment per review**, so the pull request reads as a history. Each carries its preview scores in a hidden line; the next review reads back the newest one, only from a comment `github-actions[bot]` wrote, validates it, and shows the change since then.
 - **The site never calls the API at runtime.** It is a static export; anything it shows from the API was recorded once and committed.
 
 ## Code conventions
