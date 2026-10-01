@@ -2,6 +2,8 @@
 
 Brand review on every pull request. Comment `/taste review` on a pull request and its Vercel preview is scored against your live site's brand, with the fixes your coding agent can apply.
 
+**[taste-review-action.vercel.app](https://taste-review-action.vercel.app)**
+
 Built on the [Taste Engine API](https://docs.tastelabs.com). An independent project, not affiliated with Taste Labs.
 
 ## How it works

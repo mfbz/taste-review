@@ -1,3 +1,4 @@
+export const SITE_URL = "https://taste-review-action.vercel.app";
 export const REPO_URL = "https://github.com/mfbz/taste-review";
 export const TASTE_DOCS_URL = "https://docs.tastelabs.com";
 export const TASTE_KEYS_URL = "https://engine.tastelabs.com/app/api-keys";
