@@ -65,6 +65,10 @@ permissions:
   issues: write
   pull-requests: write
 
+concurrency:
+  group: taste-review-\${{ github.event.issue.number || github.event.pull_request.number }}
+  cancel-in-progress: false
+
 jobs:
   review:
     if: >-
@@ -72,6 +76,7 @@ jobs:
       (github.event.issue.pull_request &&
        startsWith(github.event.comment.body, '/taste review'))
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: mfbz/taste-review@v1
         with:
@@ -88,7 +93,7 @@ export const FAQ = [
   {
     question: "Who can start a review?",
     answer:
-      "Only people who can push to the repository. A comment from anyone else, or from a bot, is ignored, so an outside contributor cannot spend your credits.",
+      "Only people who can push to the repository, and the ready-for-review trigger only runs for an author who can push. Anyone else, and every bot, is ignored, so an outside contributor cannot spend your credits.",
   },
   {
     question: "Can it block a merge?",
@@ -98,7 +103,7 @@ export const FAQ = [
   {
     question: "Does my preview need to be public?",
     answer:
-      "Yes. The engine crawls the page, so Vercel's deployment protection must be off for previews. The action checks the preview loads before it spends anything.",
+      "Yes. The engine crawls the page, so Vercel's deployment protection must be off for previews. The action checks every page loads, and that it is not sent to a login page, before it spends anything.",
   },
   {
     question: "Does it run on every push?",
