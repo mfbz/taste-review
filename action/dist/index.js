@@ -43317,9 +43317,6 @@ function createGitHubApi(token, owner, repo) {
     async createComment(prNumber, body) {
       await rest.issues.createComment({ ...base, issue_number: prNumber, body });
     },
-    async updateComment(commentId, body) {
-      await rest.issues.updateComment({ ...base, comment_id: commentId, body });
-    },
     async startCheck(sha, output2) {
       const { data } = await rest.checks.create({
         ...base,
@@ -63302,6 +63299,11 @@ ${marks}`;
 
 // src/render-comment.ts
 var MARKER = "<!-- taste-review -->";
+var SCORES_PREFIX = "<!-- taste-review:scores ";
+var ScoreRecordSchema = external_exports.object({
+  sha: external_exports.string().regex(/^[0-9a-f]{7,40}$/),
+  scores: external_exports.record(external_exports.string().max(200), external_exports.number().min(0).max(1))
+});
 var RECOMMENDATIONS_PER_PAGE = 5;
 var RECOMMENDATION_CHARS = 500;
 var FIXES_CHARS = 4e4;
@@ -63324,12 +63326,41 @@ function change(page, margin) {
   if (value >= margin) return `\u25B2 rose ${value.toFixed(2)}`;
   return "steady";
 }
-function header(sha, referenceUrl) {
+function sinceLast(page, previous, margin) {
+  const before = previous.scores[page.path];
+  if (page.preview === null) return "\xB7";
+  if (before === void 0) return "first review";
+  const value = page.preview - before;
+  if (value <= -margin) return `\u25BC ${Math.abs(value).toFixed(2)} from ${before.toFixed(2)}`;
+  if (value >= margin) return `\u25B2 ${value.toFixed(2)} from ${before.toFixed(2)}`;
+  return `steady from ${before.toFixed(2)}`;
+}
+function header(sha, referenceUrl, previous = null) {
   const reference = escapeMarkdown(new URL(referenceUrl).host);
+  const since = previous ? ` Compared with the last review at \`${previous.sha.slice(0, 7)}\`.` : "";
   return `${MARKER}
 ### Taste review
 
-Checked \`${sha.slice(0, 7)}\` against the brand of ${reference}.`;
+Checked \`${sha.slice(0, 7)}\` against the brand of ${reference}.${since}`;
+}
+function scoresLine(report) {
+  const scores = {};
+  for (const page of report.pages) if (page.preview !== null) scores[page.path] = page.preview;
+  return `${SCORES_PREFIX}${JSON.stringify({ sha: report.sha, scores })} -->`;
+}
+function parseScores(body) {
+  const start = body.indexOf(SCORES_PREFIX);
+  if (start === -1) return null;
+  const end = body.indexOf(" -->", start);
+  if (end === -1) return null;
+  try {
+    const parsed = ScoreRecordSchema.safeParse(
+      JSON.parse(body.slice(start + SCORES_PREFIX.length, end))
+    );
+    return parsed.success ? parsed.data : null;
+  } catch {
+    return null;
+  }
 }
 function dropped(report) {
   return report.pages.filter((page) => (delta(page) ?? 0) <= -report.margin);
@@ -63366,24 +63397,33 @@ ${capped}`, "text"),
   ].join("\n");
 }
 function renderReport(report) {
-  const rows = report.pages.map(
-    (page) => `| \`${page.path}\` | ${score(page.production)} | ${score(page.preview)} | ${change(page, report.margin)} |`
-  );
-  const table = [
-    "| Page | Production | Preview | Change |",
-    "| --- | ---: | ---: | --- |",
+  const previous = report.previous;
+  const rows = report.pages.map((page) => {
+    const cells = [
+      `\`${page.path}\``,
+      score(page.production),
+      score(page.preview),
+      change(page, report.margin),
+      ...previous ? [sinceLast(page, previous, report.margin)] : []
+    ];
+    return `| ${cells.join(" | ")} |`;
+  });
+  const table = previous ? [
+    "| Page | Production | Preview | Change | Since last review |",
+    "| --- | ---: | ---: | --- | --- |",
     ...rows
-  ];
+  ] : ["| Page | Production | Preview | Change |", "| --- | ---: | ---: | --- |", ...rows];
   const worst = [...report.pages].filter((page) => (page.verdict?.recommendations.length ?? 0) > 0).sort((a, b) => (a.preview ?? 1) - (b.preview ?? 1));
   const problems = report.pages.filter((page) => page.problem && page.preview !== null).map((page) => `- \`${page.path}\`: ${escapeMarkdown(page.problem ?? "")}`);
   const notices = report.notices.map((notice) => `- ${escapeMarkdown(notice)}`);
   return [
-    header(report.sha, report.referenceUrl),
+    `${header(report.sha, report.referenceUrl, previous)}
+${scoresLine(report)}`,
     table.join("\n"),
     [...notices, ...problems].join("\n"),
     worst.map(recommendations).join("\n\n"),
     agentBlock(report),
-    "<sub>Scores run from 0 to 1. Push your fixes and comment <code>/taste review</code> to check again.</sub>"
+    "<sub>Scores run from 0 to 1. Push your fixes and comment <code>/taste review</code> to check again; each review is a new comment.</sub>"
   ].filter(Boolean).join("\n\n");
 }
 function renderNotice(sha, referenceUrl, message) {
@@ -63419,12 +63459,15 @@ var BLOCKED_MESSAGE = {
 function errorText(error62) {
   return error62 instanceof Error ? error62.message : String(error62);
 }
-async function upsertComment(api, prNumber, body) {
-  const existing = (await api.listComments(prNumber)).find(
+async function lastReview(api, prNumber) {
+  const ours = (await api.listComments(prNumber)).filter(
     (comment) => comment.login === BOT_LOGIN && comment.userType === "Bot" && comment.body.startsWith(MARKER)
   );
-  if (existing) await api.updateComment(existing.id, body);
-  else await api.createComment(prNumber, body);
+  for (const comment of ours.reverse()) {
+    const record3 = parseScores(comment.body);
+    if (record3) return record3;
+  }
+  return null;
 }
 function pagesFor(trigger, inputs) {
   const notices = [];
@@ -63468,7 +63511,7 @@ async function run(deps) {
     await api.addEyes(trigger.commentId).catch(() => log("Could not react to the comment."));
     if (trigger.paths.length === 0 && trigger.rejected.length > 0) {
       const message = `Nothing checked: ${trigger.rejected.join(", ")} is not a page. Name pages as paths, like /taste review /pricing.`;
-      await upsertComment(api, pr.number, renderNotice(pr.headSha, inputs.referenceUrl, message));
+      await api.createComment(pr.number, renderNotice(pr.headSha, inputs.referenceUrl, message));
       return;
     }
   }
@@ -63480,7 +63523,7 @@ async function run(deps) {
   });
   const report = async (body, conclusion, output2) => {
     try {
-      await upsertComment(api, pr.number, body);
+      await api.createComment(pr.number, body);
     } catch (error62) {
       log(`Could not write the comment: ${errorText(error62)}`);
     } finally {
@@ -63524,7 +63567,12 @@ async function run(deps) {
       await notice(blocked);
       return;
     }
+    const previous = await lastReview(api, pr.number).catch((error62) => {
+      log(`Could not read earlier reviews: ${errorText(error62)}`);
+      return null;
+    });
     const result = {
+      previous,
       sha: pr.headSha,
       referenceUrl: inputs.referenceUrl,
       margin: inputs.margin,
