@@ -227,12 +227,19 @@
       </div>
 
       <div id="browser" class="frame" style="left: 230px; top: 160px; width: 1300px">
-        <div class="bar mono"><i></i><i></i><i></i><span id="url">preview · /pricing</span></div>
+        <div class="bar mono"><i></i><i></i><i></i><span id="url">vercel preview · dae0b57 · /pricing</span></div>
         <div style="position: relative">
           <img src="assets/pricing-off-brand.png" />
           <img id="fixed" src="assets/pricing-fixed.png" style="position: absolute; inset: 0" />
           <div id="wipe" style="position: absolute; top: 0; bottom: 0; width: 3px; background: #1e1e1e"></div>
         </div>
+      </div>
+      <div
+        id="vercel"
+        style="position: absolute; left: 1250px; top: 214px; display: flex; align-items: center; gap: 12px; padding: 12px 18px; border-radius: 10px; background: #000; border: 1px solid #333; box-shadow: 0 20px 60px #00000080; font-size: 19px; color: #ededed"
+      >
+        <span style="font-size: 16px">▲</span><b style="font-weight: 600">Vercel</b
+        ><span style="width: 9px; height: 9px; border-radius: 50%; background: #50e3c2"></span><span style="color: #a1a1a1">Preview ready</span>
       </div>
       <div id="after" class="tag mono" style="left: 230px; top: 104px">after · 43ae182</div>
       <div id="before" class="tag mono" style="right: 390px; top: 104px">before · dae0b57</div>
@@ -241,7 +248,7 @@
         id="composer"
         style="position: absolute; left: 1180px; top: 760px; width: 620px; border-radius: 14px; background: #0d1117; border: 1px solid #30363d; padding: 22px 24px; box-shadow: 0 30px 80px #000000a0"
       >
-        <div style="font-size: 18px; color: #8b949e; margin-bottom: 12px">Add a comment</div>
+        <div id="composerHead" style="font-size: 18px; color: #8b949e; margin-bottom: 12px">Add a comment</div>
         <div
           id="typed"
           class="mono"
@@ -253,7 +260,7 @@
           </div>
         </div>
       </div>
-      <div id="running" class="mono" style="position: absolute; left: 1180px; top: 704px; font-size: 20px; color: #959595"></div>
+      
 
       <div id="c1" class="shot" style="width: 1000px"><img src="assets/comment-1.png" /></div>
       <div id="c2" class="shot" style="width: 1000px"><img src="assets/comment-2.png" /></div>
@@ -271,6 +278,9 @@
       <div id="e1" style="position: absolute; left: 160px; top: 480px; font-size: 56px; font-weight: 400">Extract a brand from any live site.</div>
       <div id="e2" style="position: absolute; left: 160px; top: 558px; font-size: 56px; font-weight: 400">Verify any page against it.</div>
       <div id="e3" style="position: absolute; left: 160px; top: 636px; font-size: 56px; font-weight: 400">Fix it before it merges.</div>
+      <div id="e4" class="mono" style="position: absolute; left: 160px; top: 760px; font-size: 26px; color: #666562">
+        works with Vercel preview deployments · one workflow file
+      </div>
       <div
         id="e5"
         class="mono"
@@ -433,7 +443,12 @@
           const pressed = t > 12.4 && t < 12.58;
           set($("commentBtn"), { transform: pressed ? "scale(0.94)" : "scale(1)", background: pressed ? "#2ea043" : "#238636" });
           const spin = ["◜", "◝", "◞", "◟"][Math.floor(t * 8) % 4];
-          $("running").textContent = t > 12.65 && t < 13.6 ? `${spin}  scoring the preview against production` : "";
+          const running = t > 12.65;
+          $("composerHead").textContent = running ? `${spin}  scoring the Vercel preview against production` : "Add a comment";
+          $("composerHead").style.fontFamily = running ? '"Azeret Mono", monospace' : "";
+          $("composerHead").style.color = running ? "#f0f6fc" : "#8b949e";
+          const ready = out3(prog(t, 10.75, 11.1));
+          set($("vercel"), { opacity: ready * (1 - prog(t, 13.4, 13.7)), transform: `translateY(${(1 - ready) * -16}px)` });
 
           placeShot($("c1"), $("hl1"), {
             enter: out3(prog(t, 13.6, 14.2)),
@@ -452,7 +467,7 @@
           set($("wipe"), { left: `${wipe * 100}%`, opacity: wipe > 0 && wipe < 1 ? 1 : 0 });
           $("before").style.opacity = out3(prog(t, 17.3, 17.6)) * (1 - out3(prog(t, 18.7, 19.0)));
           $("after").style.opacity = out3(prog(t, 18.1, 18.4)) * (1 - prog(t, 20.5, 20.8));
-          $("url").textContent = wipe > 0.5 ? "preview 43ae182 · /pricing" : "preview dae0b57 · /pricing";
+          $("url").textContent = wipe > 0.5 ? "vercel preview · 43ae182 · /pricing" : "vercel preview · dae0b57 · /pricing";
 
           placeShot($("c2"), $("hl2"), {
             enter: out3(prog(t, 20.6, 21.2)),
@@ -475,7 +490,8 @@
           set($("e1"), fadeIn(t, 25.2, 0.4, 24));
           set($("e2"), fadeIn(t, 25.5, 0.4, 24));
           set($("e3"), fadeIn(t, 25.8, 0.4, 24));
-          set($("e5"), fadeIn(t, 26.4, 0.45, 10));
+          set($("e4"), fadeIn(t, 26.25, 0.4, 14));
+          set($("e5"), fadeIn(t, 26.6, 0.45, 10));
         }
       }
 
