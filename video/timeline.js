@@ -1,6 +1,7 @@
 // The one timeline the scene, the renderer and the score share.
 // Scene time is what index.html animates; video time is what plays. Each caption
-// slows the scene for a moment as it appears, so the viewer reads before things move.
+// slows the scene for a moment as it appears, and the title holds still long
+// enough to read, so the viewer reads before things move.
 (function (root) {
   const CAPTIONS = [
     [8.5, 13.8, "Fernhill’s live site is the reference. The Taste Engine reads its brand straight from production."],
@@ -15,29 +16,48 @@
   const SCENE_TOTAL = 46;
   const SLOW_RATE = 0.6;
   const SLOW_FOR = 1.9;
-  // A window never runs into the next caption, so the two directions agree.
-  const SLOW = CAPTIONS.map(([a], i) => [a, Math.min(a + SLOW_FOR, CAPTIONS[i + 1]?.[0] ?? Infinity)]);
+  // The title and its subtitle hold still here, in scene time, for this many seconds.
+  const HOLDS = [[2.95, 2.6]];
+
+  // Breakpoints of a piecewise-linear map: [scene, video]. A hold is two points at
+  // one scene time; a slow window is a segment with a gentler slope.
+  const points = [[0, 0]];
+  const events = [
+    ...HOLDS.map(([at, length]) => ({ at, kind: "hold", length })),
+    ...CAPTIONS.map(([a], i) => ({
+      at: a,
+      kind: "slow",
+      // a window never runs into the next caption
+      end: Math.min(a + SLOW_FOR, CAPTIONS[i + 1]?.[0] ?? Infinity),
+    })),
+  ].sort((x, y) => x.at - y.at);
+  for (const event of events) {
+    const [s, v] = points[points.length - 1];
+    const at = v + (event.at - s);
+    points.push([event.at, at]);
+    if (event.kind === "hold") points.push([event.at, at + event.length]);
+    else points.push([event.end, at + (event.end - event.at) / SLOW_RATE]);
+  }
+  const [lastScene, lastVideo] = points[points.length - 1];
+  points.push([SCENE_TOTAL, lastVideo + (SCENE_TOTAL - lastScene)]);
 
   function videoTimeOf(t) {
-    let v = t;
-    for (const [a, b] of SLOW) v += Math.max(0, Math.min(t, b) - a) * (1 / SLOW_RATE - 1);
-    return v;
+    for (let i = 1; i < points.length; i++) {
+      const [s0, v0] = points[i - 1];
+      const [s1, v1] = points[i];
+      if (s1 > s0 && t <= s1) return v0 + ((t - s0) * (v1 - v0)) / (s1 - s0);
+    }
+    return points[points.length - 1][1];
   }
 
   function sceneTimeOf(v) {
-    let t = 0;
-    let at = 0;
-    for (const [a, b] of SLOW) {
-      if (v <= at + (a - t)) return t + (v - at);
-      at += a - t;
-      t = a;
-      const slowLen = (b - a) / SLOW_RATE;
-      if (v <= at + slowLen) return t + (v - at) * SLOW_RATE;
-      at += slowLen;
-      t = b;
+    for (let i = 1; i < points.length; i++) {
+      const [s0, v0] = points[i - 1];
+      const [s1, v1] = points[i];
+      if (v <= v1) return v1 === v0 ? s0 : s0 + ((v - v0) * (s1 - s0)) / (v1 - v0);
     }
-    return t + (v - at);
+    return SCENE_TOTAL;
   }
 
-  root.TIMELINE = { CAPTIONS, SCENE_TOTAL, videoTimeOf, sceneTimeOf, VIDEO_TOTAL: videoTimeOf(SCENE_TOTAL) };
+  root.TIMELINE = { CAPTIONS, HOLDS, SCENE_TOTAL, videoTimeOf, sceneTimeOf, VIDEO_TOTAL: points[points.length - 1][1] };
 })(globalThis);

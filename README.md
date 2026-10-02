@@ -91,7 +91,7 @@ npm workspaces, Node 24:
 
 - `action/`: the GitHub Action. `action.yml` sits at the root because GitHub requires it there; it runs `action/dist/index.js`, the committed bundle.
 - `site/`: the landing page, a static Next.js export with shadcn/ui and Tailwind 4. Its design system is in [`site/DESIGN.md`](site/DESIGN.md).
-- `video/`: the 56-second demo video, an HTML scene rendered frame by frame with headless Chrome, a synthesized score, and ffmpeg to put them together (`cd video && npm install && npm run video`, macOS with Chrome). Its footage is the real pull request in the demo repository.
+- `video/`: the 59-second demo video, an HTML scene rendered frame by frame with headless Chrome, a synthesized score, and ffmpeg to put them together (`cd video && npm install && npm run video`, macOS with Chrome). Its footage is the real pull request in the demo repository.
 - `scripts/extract-brand.ts`: a one-off that extracts a site's design system with the Taste Engine into `.cache/`, which is gitignored. It spends credits and reads `TASTE_API_KEY` from `.env` (see `.env.example`).
 
 ```bash
