@@ -1,9 +1,11 @@
-// The soundtrack, synthesized: felt piano and bowed strings, warm and unhurried.
-// A soft piano ostinato gives the story its pulse, strings carry the harmony and
-// swell where the story turns (D minor under the agent's pull request, the drop on
-// the one heavy chord, home to F on the recovery), and the only other sounds are
-// the keystrokes and the click on screen. Cues are written in scene time and
-// placed through timeline.js, the same timeline the picture uses.
+// The soundtrack, synthesized: upbeat and bright, 120 BPM in F. A punchy kick,
+// claps on two and four, off-beat hats, a plucked bass in eighths, piano stabs
+// and a plucked lead hook, with the pads pumping against the kick. It builds
+// through the intro, the groove lands with the brand, the drums drop out for a
+// bar when the score falls to 0.35, slam back for the fixes, peak on the
+// recovery and end on one hit. The only other sounds are the keystrokes and the
+// click on screen. Sections are written in scene time and placed through
+// timeline.js, the same timeline the picture uses.
 //
 //   node score.ts → out/score.wav
 
@@ -11,97 +13,59 @@ import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { runInNewContext } from "node:vm";
 
-type Timeline = {
-  VIDEO_TOTAL: number;
-  videoTimeOf: (t: number) => number;
-  sceneTimeOf: (v: number) => number;
-};
-type Chord = { at: number; root: number; voices: number[]; strings: number };
+type Timeline = { VIDEO_TOTAL: number; videoTimeOf: (t: number) => number };
 
 const sandbox: { TIMELINE?: Timeline } = {};
 runInNewContext(readFileSync(join(import.meta.dirname, "timeline.js"), "utf8"), Object.assign(sandbox, { globalThis: sandbox }));
 const TL = sandbox.TIMELINE as Timeline;
-const V = (t: number) => TL.videoTimeOf(t);
 
 const RATE = 48000;
 const DURATION = Math.ceil(TL.VIDEO_TOTAL * 10) / 10;
 const N = Math.ceil(DURATION * RATE);
 const TAU = Math.PI * 2;
 const OUT = join(import.meta.dirname, "out");
-const BPM = 84;
-const EIGHTH = 60 / BPM / 2;
+const BPM = 120;
+const BEAT = 60 / BPM;
+const BAR = BEAT * 4;
+const SIXTEENTH = BEAT / 4;
 
-// Scene-time chord changes; strings is how far the string section swells there (0 to 1).
-const CHORDS: Chord[] = [
-  { at: 0, root: 41, voices: [53, 57, 60, 64, 67], strings: 0.5 },
-  { at: 3.5, root: 38, voices: [53, 57, 60, 64], strings: 0.6 },
-  { at: 5.7, root: 46, voices: [50, 53, 57, 62], strings: 0.65 },
-  { at: 8.0, root: 41, voices: [53, 57, 60, 64, 67], strings: 0.55 },
-  { at: 11.0, root: 46, voices: [50, 53, 57, 62], strings: 0.6 },
-  { at: 14.0, root: 38, voices: [50, 53, 57, 60, 64], strings: 0.65 },
-  { at: 17.0, root: 46, voices: [50, 53, 58, 62], strings: 0.65 },
-  { at: 18.2, root: 48, voices: [53, 55, 60, 65], strings: 0.7 },
-  { at: 20.8, root: 45, voices: [52, 55, 60, 64], strings: 0.75 },
-  { at: 22.4, root: 38, voices: [50, 53, 57, 62], strings: 0.95 },
-  { at: 25.7, root: 46, voices: [50, 53, 57, 62], strings: 0.7 },
-  { at: 28.6, root: 46, voices: [53, 58, 62, 65], strings: 0.7 },
-  { at: 30.6, root: 48, voices: [52, 55, 60, 64], strings: 0.8 },
-  { at: 34.0, root: 41, voices: [53, 57, 60, 64, 69, 72], strings: 1.0 },
-  { at: 36.6, root: 46, voices: [53, 57, 62, 65, 69], strings: 0.85 },
-  { at: 38.0, root: 48, voices: [52, 55, 60, 64, 67], strings: 0.85 },
-  { at: 39.3, root: 41, voices: [53, 57, 60, 64, 67, 72], strings: 0.9 },
+// The bar grid is shifted so a bar starts exactly on the drop (0.35 landing on screen);
+// every other section snaps to the nearest bar of that grid.
+const OFFSET = (TL.videoTimeOf(22.4) % BAR) - BAR;
+const barStart = (b: number) => OFFSET + b * BAR;
+const bar = (scene: number) => Math.round((TL.videoTimeOf(scene) - OFFSET) / BAR);
+const SECTIONS = {
+  hook: bar(3.5),
+  groove: bar(8.0),
+  drop: bar(22.4),
+  fixes: bar(22.4) + 1,
+  recovery: bar(34.0),
+  end: bar(39.3),
+  finalHit: bar(42.0),
+};
+const BARS = Math.floor((DURATION - OFFSET) / BAR);
+
+// I–vi–IV–V in F, one chord a bar; the drop sits on D minor.
+const LOOP = [
+  { root: 41, tones: [57, 60, 64, 65, 69] },
+  { root: 38, tones: [57, 60, 62, 65, 69] },
+  { root: 46, tones: [58, 62, 65, 69, 70] },
+  { root: 48, tones: [55, 60, 64, 67, 72] },
 ];
-const OSTINATO = [
-  [8.0, 22.3],
-  [23.9, 41.6],
-] as const;
-const MELODY: [scene: number, midi: number, velocity: number][] = [
-  [0.4, 72, 0.32],
-  [1.4, 69, 0.28],
-  [2.5, 67, 0.3],
-  [3.8, 69, 0.38],
-  [4.6, 67, 0.36],
-  [5.7, 72, 0.4],
-  [9.6, 76, 0.3],
-  [12.2, 74, 0.28],
-  [15.4, 69, 0.3],
-  [16.5, 65, 0.28],
-  [22.4, 38, 0.6],
-  [22.4, 45, 0.5],
-  [22.4, 50, 0.45],
-  [22.4, 53, 0.42],
-  [25.8, 69, 0.3],
-  [26.6, 67, 0.28],
-  [27.4, 65, 0.28],
-  [31.5, 72, 0.3],
-  [32.3, 74, 0.3],
-  [33.1, 76, 0.32],
-  [34.9, 77, 0.42],
-  [34.9, 81, 0.36],
-  [36.8, 79, 0.32],
-  [37.6, 76, 0.3],
-  [40.3, 72, 0.32],
-  [40.7, 76, 0.32],
-  [41.1, 79, 0.34],
-  [41.5, 84, 0.34],
-  [43.0, 41, 0.42],
-  [43.0, 53, 0.32],
-  [43.0, 60, 0.3],
-  [43.0, 64, 0.3],
-  [43.0, 69, 0.32],
-];
+const D_MINOR = LOOP[1];
+const F_MAJOR = LOOP[0];
+
 const TYPE_COMMAND = [19.15, 19.9, 13] as const;
 const CLICK = 20.6;
-const FADE_OUT = [V(44.0), DURATION] as const;
 
-let seed = 13;
+let seed = 17;
 const rand = () => {
   seed = (seed * 16807) % 2147483647;
   return seed / 2147483647 - 0.5;
 };
 const hz = (midi: number) => 440 * 2 ** ((midi - 69) / 12);
 const clamp = (x: number, a = 0, b = 1) => Math.min(b, Math.max(a, x));
-const chordAt = (scene: number) => [...CHORDS].reverse().find((c) => c.at <= scene) ?? CHORDS[0];
+const chordOfBar = (b: number) => (b === SECTIONS.drop ? D_MINOR : b >= SECTIONS.finalHit ? F_MAJOR : LOOP[b % 4]);
 
 class Bus {
   l = new Float32Array(N);
@@ -114,104 +78,135 @@ class Bus {
   }
 }
 
-const dry = new Bus();
+const drums = new Bus();
+const music = new Bus();
 const send = new Bus();
+const duck = new Float32Array(N).fill(1);
 
-// A felt piano: slightly inharmonic partials that die faster the higher they are,
-// a soft hammer and a short felt thump. Quieter notes are darker.
-function piano(time: number, midi: number, velocity: number, ring = 1) {
-  const f0 = hz(midi);
+function noiseHit(bus: Bus, time: number, length: number, decay: number, gain: number, bright: number, pan = 0, sendAmount = 0) {
+  // white noise through a one-pole high-pass: brighter as `bright` rises toward 1
   const s0 = Math.floor(time * RATE);
-  const pitchDecay = clamp(1.6 - (midi - 40) / 50, 0.45, 1.6) * ring;
-  const length = Math.floor(Math.min(7, 6 * pitchDecay) * RATE);
-  const pan = clamp((midi - 60) / 30, -0.6, 0.6);
-  const partials = Array.from({ length: 10 }, (_, k) => {
-    const n = k + 1;
-    return {
-      f: f0 * n * Math.sqrt(1 + 0.00035 * n * n),
-      amp: (1 / n ** 1.25) * Math.exp(-n * (1 - velocity) * 0.55),
-      tau: (2.8 * pitchDecay) / (1 + n * 0.35),
-      phase: rand() * TAU,
-    };
-  }).filter((p) => p.f < 9000);
-  for (let k = 0; k < length; k++) {
-    const t = k / RATE;
-    let v = 0;
-    for (const p of partials) v += p.amp * Math.exp(-t / p.tau) * Math.sin(TAU * p.f * t + p.phase);
-    v *= Math.min(1, t / 0.006) * velocity * 0.22;
-    dry.add(s0 + k, v, pan);
-    send.add(s0 + k, v * 0.5, -pan * 0.5);
-  }
-  let y = 0;
-  for (let k = 0; k < 0.03 * RATE; k++) {
-    y += 0.3 * (rand() * 2 - y);
-    dry.add(s0 + k, y * Math.exp(-k / (0.004 * RATE)) * velocity * 0.07, pan);
+  let prev = 0;
+  let hp = 0;
+  for (let k = 0; k < length * RATE; k++) {
+    const x = rand() * 2;
+    hp = bright * (hp + x - prev);
+    prev = x;
+    const v = hp * Math.exp(-k / (decay * RATE)) * gain;
+    bus.add(s0 + k, v, pan);
+    if (sendAmount) send.add(s0 + k, v * sendAmount, -pan);
   }
 }
 
-// One band-limited sawtooth cycle, dark at the top, for the strings.
+function kick(time: number, gain: number) {
+  const s0 = Math.floor(time * RATE);
+  let phase = 0;
+  for (let k = 0; k < 0.32 * RATE; k++) {
+    const t = k / RATE;
+    phase += (TAU * (48 + 110 * Math.exp(-t * 32))) / RATE;
+    drums.add(s0 + k, Math.sin(phase) * Math.exp(-t * 7.5) * gain);
+  }
+  noiseHit(drums, time, 0.008, 0.002, gain * 0.5, 0.6);
+  // the pumping: everything but the drums ducks under the kick
+  for (let k = 0; k < 0.3 * RATE; k++) {
+    const i = s0 + k;
+    if (i < N) duck[i] = Math.min(duck[i], 1 - 0.55 * Math.exp(-k / (0.09 * RATE)));
+  }
+}
+
+function clap(time: number, gain: number) {
+  for (const [offset, g] of [
+    [0, 0.6],
+    [0.011, 0.75],
+    [0.022, 1],
+  ]) {
+    noiseHit(drums, time + offset, offset === 0.022 ? 0.22 : 0.012, offset === 0.022 ? 0.05 : 0.004, gain * g, 0.85, 0, 0.35);
+  }
+}
+
+// A felt-ish piano, used short for the stabs and long for the hits.
+function piano(time: number, midi: number, velocity: number, ring = 1) {
+  const f0 = hz(midi);
+  const s0 = Math.floor(time * RATE);
+  const decay = clamp(1.5 - (midi - 40) / 50, 0.4, 1.5) * ring;
+  const pan = clamp((midi - 62) / 26, -0.6, 0.6);
+  const partials = Array.from({ length: 9 }, (_, k) => ({
+    f: f0 * (k + 1) * Math.sqrt(1 + 0.0003 * (k + 1) ** 2),
+    amp: (1 / (k + 1) ** 1.15) * Math.exp(-(k + 1) * (1 - velocity) * 0.45),
+    tau: (2.4 * decay) / (1 + (k + 1) * 0.35),
+    phase: rand() * TAU,
+  })).filter((p) => p.f < 10000);
+  for (let k = 0; k < Math.min(6, 5 * decay) * RATE; k++) {
+    const t = k / RATE;
+    let v = 0;
+    for (const p of partials) v += p.amp * Math.exp(-t / p.tau) * Math.sin(TAU * p.f * t + p.phase);
+    v *= Math.min(1, t / 0.004) * velocity * 0.2;
+    music.add(s0 + k, v, pan);
+    send.add(s0 + k, v * 0.35, -pan);
+  }
+}
+
+// A plucked tone: a bright attack that closes fast, for the bass and the lead.
+function pluck(time: number, midi: number, gain: number, decay: number, harmonics: number, pan = 0, sendAmount = 0.2) {
+  const f0 = hz(midi);
+  const s0 = Math.floor(time * RATE);
+  for (let k = 0; k < decay * 5 * RATE; k++) {
+    const t = k / RATE;
+    let v = 0;
+    for (let n = 1; n <= harmonics; n++) v += (Math.sin(TAU * f0 * n * t) / n) * Math.exp(-t / (decay / n ** 0.6));
+    v *= Math.min(1, t / 0.003) * gain;
+    music.add(s0 + k, v, pan);
+    if (sendAmount) send.add(s0 + k, v * sendAmount, -pan);
+  }
+}
+
+// A soft pad: detuned band-limited saws, slow attack, under everything.
 const TABLE = (() => {
   const size = 4096;
   const table = new Float32Array(size);
   for (let i = 0; i < size; i++) {
     let v = 0;
-    for (let n = 1; n <= 14; n++) v += (Math.sin((TAU * n * i) / size) / n) * Math.exp(-n * 0.18);
+    for (let n = 1; n <= 12; n++) v += (Math.sin((TAU * n * i) / size) / n) * Math.exp(-n * 0.22);
     table[i] = v * 0.6;
   }
   return table;
 })();
 
-// A bowed note: three detuned voices, slow attack, vibrato that arrives late.
-function strings(start: number, end: number, midi: number, gain: number, pan: number) {
+function pad(start: number, end: number, midi: number, gain: number, pan: number) {
   const s0 = Math.floor(start * RATE);
-  const attack = 1.3;
-  const release = 1.8;
-  const length = Math.floor((end - start + release) * RATE);
+  const held = end - start;
+  const length = Math.floor((held + 0.6) * RATE);
   const f0 = hz(midi);
-  const voices = [-0.004, 0, 0.005].map((d) => ({ ratio: 1 + d, phase: Math.random() }));
+  const voices = [-0.005, 0.005].map((d) => ({ ratio: 1 + d, phase: Math.abs(rand()) }));
   for (let k = 0; k < length; k++) {
     const t = k / RATE;
-    const held = end - start;
-    const env = (t < attack ? (1 - Math.cos((Math.PI * t) / attack)) / 2 : 1) * (t > held ? Math.max(0, 1 - (t - held) / release) : 1);
-    if (env <= 0) continue;
-    const vib = 1 + 0.0025 * Math.sin(TAU * 5.1 * t) * clamp((t - 0.6) / 1.2);
+    const env = Math.min(1, t / 0.25) * (t > held ? Math.max(0, 1 - (t - held) / 0.6) : 1);
     let v = 0;
     for (const voice of voices) {
-      voice.phase += (f0 * voice.ratio * vib) / RATE;
+      voice.phase += (f0 * voice.ratio) / RATE;
       voice.phase -= Math.floor(voice.phase);
       v += TABLE[Math.floor(voice.phase * TABLE.length)];
     }
-    v *= env * gain;
-    dry.add(s0 + k, v * 0.55, pan);
-    send.add(s0 + k, v * 0.9, -pan);
+    music.add(s0 + k, v * env * gain, pan);
+    send.add(s0 + k, v * env * gain * 0.6, -pan);
   }
 }
 
 function key(time: number, gain: number) {
-  const s0 = Math.floor(time * RATE);
-  let y = 0;
-  for (let k = 0; k < 0.035 * RATE; k++) {
-    y += 0.35 * (rand() * 2 - y);
-    dry.add(s0 + k, y * Math.exp(-k / (0.004 * RATE)) * gain, 0.15);
-  }
-  for (let k = 0; k < 0.03 * RATE; k++) {
-    const t = k / RATE;
-    dry.add(s0 + k, Math.sin(TAU * 180 * t) * Math.exp(-t / 0.008) * gain * 0.4, 0.15);
-  }
+  noiseHit(music, time, 0.035, 0.004, gain, 0.5, 0.15);
 }
 
-// A warm room: six damped combs and three all-passes per side.
 function reverb(input: Bus): Bus {
   const out = new Bus();
   const run = (src: Float32Array, dst: Float32Array, spread: number) => {
-    const combs = [1557, 1617, 1491, 1422, 1277, 1356].map((d) => ({ buf: new Float32Array(Math.round(d * 1.35) + spread), i: 0, store: 0 }));
+    const combs = [1557, 1617, 1491, 1422, 1277, 1356].map((d) => ({ buf: new Float32Array(d + spread), i: 0, store: 0 }));
     const passes = [556, 441, 341].map((d) => ({ buf: new Float32Array(d + spread), i: 0 }));
     for (let k = 0; k < N; k++) {
       let acc = 0;
       for (const c of combs) {
         const y = c.buf[c.i];
-        c.store = y * 0.45 + c.store * 0.55;
-        c.buf[c.i] = src[k] + c.store * 0.86;
+        c.store = y * 0.5 + c.store * 0.5;
+        c.buf[c.i] = src[k] + c.store * 0.8;
         c.i = (c.i + 1) % c.buf.length;
         acc += y;
       }
@@ -275,53 +270,83 @@ function writeWav(path: string, l: Float32Array, r: Float32Array) {
   writeFileSync(path, Buffer.concat([header, data]));
 }
 
-// strings: each chord held until the next, a little overlap so the bows cross
-CHORDS.forEach((chord, i) => {
-  const start = V(chord.at);
-  const end = i + 1 < CHORDS.length ? V(CHORDS[i + 1].at) + 0.4 : V(44.5);
-  const gain = 0.035 * chord.strings;
-  chord.voices.forEach((m, n) => strings(start, end, m, gain, (n / (chord.voices.length - 1) - 0.5) * 1.3));
-  strings(start, end, chord.root + 12, gain * 0.9, 0);
-});
+const LEAD = [0, 2, 4, 2, 3, 1, 4, 2, 0, 2, 4, 3, 4, 2, 1, 2];
 
-// the ostinato: eighths on a fixed grid, the chord read from the picture's scene time
-for (const [from, to] of OSTINATO) {
-  for (let v = V(from); v < V(to); v += EIGHTH) {
-    const chord = chordAt(TL.sceneTimeOf(v));
-    const tones = [chord.root + 12, ...chord.voices].filter((m) => m >= 53 && m <= 72);
-    const step = Math.round((v - V(from)) / EIGHTH);
-    const pattern = [0, 2, 3, 1, 3, 2, 0, 3];
-    const midi = tones[pattern[step % 8] % tones.length];
-    piano(v + rand() * 0.008, midi, step % 2 ? 0.17 : 0.23, 0.55);
+for (let b = 0; b < BARS; b++) {
+  const t0 = barStart(b);
+  const chord = chordOfBar(b);
+  const intro = b < SECTIONS.hook;
+  const hook = b >= SECTIONS.hook && b < SECTIONS.groove;
+  const drop = b === SECTIONS.drop;
+  const peak = b >= SECTIONS.recovery && b < SECTIONS.finalHit;
+  const final = b === SECTIONS.finalHit;
+  const after = b > SECTIONS.finalHit;
+  if (after) break;
+
+  // the pad, every bar, louder once the groove is in
+  chord.tones.slice(0, 4).forEach((m, n) => pad(t0, t0 + BAR, m, (intro ? 0.012 : 0.018) * (peak ? 1.25 : 1), (n / 3 - 0.5) * 1.2));
+
+  if (final) {
+    // the last hit: the whole band on F, then the room
+    kick(t0, 0.9);
+    clap(t0, 0.35);
+    [41, 53, 57, 60, 65, 69, 72].forEach((m) => piano(t0, m, 0.55, 1.6));
+    pluck(t0, 29, 0.5, 0.9, 3, 0, 0);
+    noiseHit(drums, t0, 1.6, 0.5, 0.06, 0.95, 0.2, 0.6);
+    continue;
+  }
+
+  if (drop) {
+    // the drums fall away; one low D minor chord and the room
+    [38, 50, 53, 57, 62].forEach((m) => piano(t0, m, 0.6, 1.3));
+    pluck(t0, 26, 0.45, 0.8, 3, 0, 0);
+    continue;
+  }
+
+  for (let s = 0; s < 16; s++) {
+    const t = t0 + s * SIXTEENTH + (s % 2 ? SIXTEENTH * 0.08 : 0);
+    const beat = s / 4;
+    // drums
+    if (!intro && s % 4 === 0 && (hook ? b >= SECTIONS.hook + 1 : true)) kick(t, hook ? 0.6 : 0.85);
+    if (!intro && !hook && (s === 4 || s === 12)) clap(t, peak ? 0.42 : 0.36);
+    if (s % 4 === 2) noiseHit(drums, t, 0.14, intro ? 0.03 : 0.06, intro ? 0.05 : 0.09, 0.95, 0.3);
+    if (!intro && s % 2 === 1) noiseHit(drums, t, 0.03, 0.012, hook ? 0.03 : 0.045, 0.97, -0.3);
+    // the bass: eighths on the root, an octave jump on the off-beat of three
+    if (!intro && s % 2 === 0) {
+      const midi = chord.root - 12 + (s === 10 ? 12 : 0);
+      pluck(t, midi, hook ? 0.16 : 0.22, 0.16, 6, 0, 0);
+    }
+    // the stabs: short piano chords on the and-of-two and the and-of-four
+    if (!intro && (s === 6 || s === 14)) chord.tones.slice(0, 3).forEach((m) => piano(t, m + 12, peak ? 0.42 : 0.34, 0.25));
+    // the lead hook: sixteenths over the chord, every other bar, and every bar at the peak
+    const leadOn = intro || (b >= SECTIONS.groove && (peak || b % 2 === 0) && b !== SECTIONS.fixes);
+    if (leadOn) pluck(t, chord.tones[LEAD[s]] + 12, intro ? 0.05 + 0.02 * beat : peak ? 0.085 : 0.07, 0.12, 5, s % 2 ? 0.35 : -0.35, 0.35);
   }
 }
 
-for (const [scene, midi, velocity] of MELODY) piano(V(scene), midi, velocity);
-
 const [from, to, count] = TYPE_COMMAND;
-for (let n = 0; n < count; n++) key(V(from + ((to - from) * n) / count) + rand() * 0.015, 0.09 + rand() * 0.03);
-key(V(CLICK), 0.16);
+for (let n = 0; n < count; n++) key(TL.videoTimeOf(from + ((to - from) * n) / count) + rand() * 0.015, 0.16 + rand() * 0.04);
+noiseHit(music, TL.videoTimeOf(CLICK), 0.04, 0.006, 0.28, 0.4);
 
 const verb = reverb(send);
 const l = new Float32Array(N);
 const r = new Float32Array(N);
+const fadeOutFrom = barStart(SECTIONS.finalHit) + 2.2;
 for (let k = 0; k < N; k++) {
   const t = k / RATE;
-  const fade = clamp(t / 0.08) * (1 - clamp((t - FADE_OUT[0]) / (FADE_OUT[1] - FADE_OUT[0])));
-  // a touch of tape: soft saturation glues the piano and strings together
-  const tape = (x: number) => Math.tanh(x * 1.6) / Math.tanh(1.6);
-  l[k] = tape(dry.l[k] + verb.l[k]) * fade;
-  r[k] = tape(dry.r[k] + verb.r[k]) * fade;
+  const fade = clamp(t / 0.03) * (1 - clamp((t - fadeOutFrom) / Math.max(0.5, DURATION - fadeOutFrom)));
+  const tape = (x: number) => Math.tanh(x * 1.5) / Math.tanh(1.5);
+  l[k] = tape(drums.l[k] + (music.l[k] + verb.l[k]) * duck[k]) * fade;
+  r[k] = tape(drums.r[k] + (music.r[k] + verb.r[k]) * duck[k]) * fade;
 }
-highPass(l, 40);
-highPass(r, 40);
+highPass(l, 35);
+highPass(r, 35);
 let peak = 0;
 for (let k = 0; k < N; k++) peak = Math.max(peak, Math.abs(l[k]), Math.abs(r[k]));
-const gain = 0.89 / peak;
 for (let k = 0; k < N; k++) {
-  l[k] *= gain;
-  r[k] *= gain;
+  l[k] *= 0.89 / peak;
+  r[k] *= 0.89 / peak;
 }
 mkdirSync(OUT, { recursive: true });
 writeWav(join(OUT, "score.wav"), l, r);
-console.log(`Wrote ${join(OUT, "score.wav")} (${DURATION}s)`);
+console.log(`Wrote ${join(OUT, "score.wav")} (${DURATION}s, bars: ${JSON.stringify(SECTIONS)})`);
