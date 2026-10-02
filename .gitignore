@@ -22,3 +22,6 @@ coverage/
 *.pem
 npm-debug.log*
 .vercel
+
+# the video renders here; the MP4 is published, never committed
+video/out/

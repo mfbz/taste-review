@@ -1,0 +1,472 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>taste review</title>
+    <link rel="stylesheet" href="node_modules/@fontsource-variable/figtree/index.css" />
+    <link rel="stylesheet" href="node_modules/@fontsource/azeret-mono/400.css" />
+    <link rel="stylesheet" href="node_modules/@fontsource/azeret-mono/500.css" />
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+      }
+      html,
+      body {
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: #1e1e1e;
+      }
+      body {
+        font-family: "Figtree Variable", sans-serif;
+        font-weight: 300;
+        color: #f5f7f2;
+        -webkit-font-smoothing: antialiased;
+      }
+      .layer {
+        position: absolute;
+        inset: 0;
+      }
+      .mono {
+        font-family: "Azeret Mono", monospace;
+        font-variant-ligatures: none;
+      }
+      #paper {
+        background: #f5f7f2;
+      }
+      .card {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 200px;
+        height: 260px;
+        margin: -130px 0 0 -100px;
+        border-radius: 34px;
+        display: flex;
+        align-items: flex-end;
+        padding: 18px;
+        font-size: 15px;
+      }
+      #stage1 {
+        perspective: 1600px;
+      }
+      .label {
+        position: absolute;
+        left: 96px;
+        top: 72px;
+        font-size: 22px;
+        color: #959595;
+        letter-spacing: 0.02em;
+      }
+      .label b {
+        color: #f5f7f2;
+        font-weight: 500;
+        margin-right: 18px;
+      }
+      .frame {
+        position: absolute;
+        border-radius: 22px;
+        overflow: hidden;
+        border: 1px solid #ffffff26;
+        background: #f6f1e7;
+        box-shadow: 0 40px 120px #00000080;
+      }
+      .frame .bar {
+        height: 44px;
+        background: #272726;
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        padding: 0 18px;
+        font-size: 15px;
+        color: #959595;
+      }
+      .frame .bar i {
+        width: 11px;
+        height: 11px;
+        border-radius: 50%;
+        background: #ffffff26;
+      }
+      .frame .bar span {
+        margin-left: 14px;
+      }
+      .frame img {
+        display: block;
+        width: 100%;
+      }
+      .shot {
+        position: absolute;
+        transform-origin: 0 0;
+      }
+      .shot img {
+        display: block;
+        width: 100%;
+        border-radius: 14px;
+        box-shadow: 0 30px 100px #000000a0;
+      }
+      .hl {
+        position: absolute;
+        border-radius: 8px;
+        border: 3px solid;
+        pointer-events: none;
+      }
+      .tag {
+        position: absolute;
+        font-size: 18px;
+        padding: 8px 14px;
+        border-radius: 6px;
+        background: #1e1e1ecc;
+        border: 1px solid #ffffff33;
+        color: #f5f7f2;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="paper" class="layer"></div>
+
+    <div id="stage1" class="layer">
+      <div id="cards" class="layer"></div>
+      <div id="engine" class="mono" style="position: absolute; left: 0; right: 0; top: 250px; text-align: center; font-size: 22px; color: #959595; letter-spacing: 0.08em">&lt;&gt;TASTE ENGINE API&gt;</div>
+      <svg id="octagon" class="layer" viewBox="0 0 1920 1080">
+        <path
+          id="octPath"
+          fill="none"
+          stroke="#f5f7f2"
+          stroke-width="2"
+          stroke-linejoin="round"
+          d=""
+        />
+      </svg>
+      <div
+        id="title"
+        class="mono layer"
+        style="display: flex; align-items: center; justify-content: center; font-size: 86px; font-weight: 500"
+      ></div>
+      <div
+        id="titleSub"
+        class="layer"
+        style="display: flex; align-items: center; justify-content: center; padding-top: 190px; font-size: 30px; color: #959595"
+      >
+        built on the Taste Engine API
+      </div>
+    </div>
+
+    <div id="stage2" class="layer" style="color: #1e1e1e; padding: 0 160px">
+      <div id="s2a" style="position: absolute; left: 160px; top: 300px; font-size: 92px; font-weight: 400; color: #959595; letter-spacing: -0.02em">
+        Coding agents ship UI all day.
+      </div>
+      <div id="s2b" style="position: absolute; left: 160px; top: 412px; font-size: 92px; font-weight: 400; letter-spacing: -0.02em">
+        Is it still your brand?
+      </div>
+      <div id="s2c" style="position: absolute; left: 160px; top: 600px; width: 1200px; font-size: 38px; line-height: 1.4; color: #666562">
+        The Taste Engine API reads a brand straight from a live site and verifies any page against it.
+      </div>
+      <div
+        id="s2d"
+        class="mono"
+        style="position: absolute; left: 160px; top: 800px; font-size: 26px; padding: 16px 34px; border-radius: 6px; background: #1e1e1e; color: #f5f7f2"
+      >
+        Now on every pull request
+      </div>
+    </div>
+
+    <div id="stage3" class="layer">
+      <div id="label1" class="label mono"><b>01</b>an agent redesigns /pricing</div>
+      <div id="label2" class="label mono"><b>02</b>the agent applies the fixes</div>
+
+      <div id="browser" class="frame" style="left: 230px; top: 150px; width: 1300px">
+        <div class="bar mono"><i></i><i></i><i></i><span id="url">preview · /pricing</span></div>
+        <div style="position: relative">
+          <img src="assets/pricing-off-brand.png" />
+          <img id="fixed" src="assets/pricing-fixed.png" style="position: absolute; inset: 0" />
+          <div id="wipe" style="position: absolute; top: 0; bottom: 0; width: 3px; background: #1e1e1e"></div>
+        </div>
+      </div>
+      <div id="after" class="tag mono" style="left: 230px; top: 106px">after · 43ae182</div>
+      <div id="before" class="tag mono" style="right: 390px; top: 106px">before · dae0b57</div>
+
+      <div
+        id="composer"
+        style="position: absolute; left: 1180px; top: 760px; width: 620px; border-radius: 14px; background: #0d1117; border: 1px solid #30363d; padding: 22px 24px; box-shadow: 0 30px 80px #000000a0"
+      >
+        <div style="font-size: 18px; color: #8b949e; margin-bottom: 12px">Add a comment</div>
+        <div
+          id="typed"
+          class="mono"
+          style="height: 64px; border-radius: 8px; border: 1px solid #30363d; background: #010409; padding: 18px; font-size: 24px; color: #f0f6fc"
+        ></div>
+        <div style="display: flex; justify-content: flex-end; margin-top: 14px">
+          <div
+            id="commentBtn"
+            style="font-size: 18px; font-weight: 600; padding: 9px 18px; border-radius: 8px; background: #238636; color: #fff"
+          >
+            Comment
+          </div>
+        </div>
+      </div>
+
+      <div id="running" class="mono" style="position: absolute; left: 1180px; top: 700px; font-size: 20px; color: #959595"></div>
+
+      <div id="c1" class="shot" style="width: 1000px"><img src="assets/comment-1.png" /></div>
+      <div id="c2" class="shot" style="width: 1000px"><img src="assets/comment-2.png" /></div>
+      <div id="hl1" class="hl" style="border-color: #ff4c24"></div>
+      <div id="hl2" class="hl" style="border-color: #f5f7f2"></div>
+    </div>
+
+    <div id="stage4" class="layer" style="color: #1e1e1e">
+      <div id="scores" style="position: absolute; left: 160px; top: 200px; font-size: 168px; font-weight: 400; letter-spacing: -0.03em; font-variant-numeric: tabular-nums">
+        <span id="scoreFrom" style="color: #959595">0.35</span>
+        <span id="arrow" style="color: #959595; margin: 0 24px">→</span>
+        <span id="scoreTo">0.35</span>
+      </div>
+      <div id="e1" style="position: absolute; left: 160px; top: 480px; font-size: 54px; font-weight: 400">Extract a brand from any live site.</div>
+      <div id="e2" style="position: absolute; left: 160px; top: 556px; font-size: 54px; font-weight: 400">Verify any page against it.</div>
+      <div id="e3" style="position: absolute; left: 160px; top: 632px; font-size: 54px; font-weight: 400">Fix it before it merges.</div>
+      <div id="e4" style="position: absolute; left: 160px; top: 760px; font-size: 32px; color: #666562">
+        One API call per page, now in every pull request.
+      </div>
+      <div
+        id="e5"
+        class="mono"
+        style="position: absolute; left: 160px; right: 160px; bottom: 90px; display: flex; justify-content: space-between; font-size: 24px; color: #1e1e1e; border-top: 1px solid #0000001a; padding-top: 30px"
+      >
+        <span><span style="color: #959595">/</span>taste review · built on the Taste Engine API</span>
+        <span>github.com/mfbz/taste-review</span>
+      </div>
+    </div>
+
+    <script>
+      const W = 1920;
+      const H = 1080;
+      const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+      const prog = (t, a, b) => clamp((t - a) / (b - a));
+      const out3 = (x) => 1 - Math.pow(1 - x, 3);
+      const inOut = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+      const lerp = (a, b, x) => a + (b - a) * x;
+      const $ = (id) => document.getElementById(id);
+      const set = (el, style) => Object.assign(el.style, style);
+      const fadeIn = (t, a, d = 0.5, dy = 30) => {
+        const x = out3(prog(t, a, a + d));
+        return { opacity: x, transform: `translateY(${(1 - x) * dy}px)` };
+      };
+
+      // The swatches the extractor read from tastelabs.com and from the demo brand.
+      const SWATCHES = [
+        ["#F5F7F2", "#1E1E1E"],
+        ["#3F6B3A", "#F6F1E7"],
+        ["#0000EE", "#F5F7F2"],
+        ["#EDE5D3", "#1F2A1F"],
+        ["#1E1E1E", "#F5F7F2"],
+        ["#FF4C24", "#1E1E1E"],
+        ["#F6F1E7", "#3F6B3A"],
+        ["#8B8B8B", "#F5F7F2"],
+        ["#111111", "#959595"],
+        ["#EAECE7", "#1E1E1E"],
+        ["#2F5229", "#F6F1E7"],
+      ];
+      const cards = SWATCHES.map(([bg, fg]) => {
+        const el = document.createElement("div");
+        el.className = "card mono";
+        el.style.background = bg;
+        el.style.color = fg;
+        el.style.border = "1px solid #ffffff1a";
+        el.textContent = bg;
+        $("cards").appendChild(el);
+        return el;
+      });
+
+      function octagon(cx, cy, rx, ry, c) {
+        const pts = [
+          [cx - rx + c, cy - ry],
+          [cx + rx - c, cy - ry],
+          [cx + rx, cy - ry + c],
+          [cx + rx, cy + ry - c],
+          [cx + rx - c, cy + ry],
+          [cx - rx + c, cy + ry],
+          [cx - rx, cy + ry - c],
+          [cx - rx, cy - ry + c],
+        ];
+        return "M" + pts.map((p) => p.join(",")).join("L") + "Z";
+      }
+
+      const T = {
+        paperIn: 3.45,
+        paperOut: 7.7,
+        endIn: 23.9,
+        total: 28.5,
+      };
+
+      function seek(t) {
+        // Backgrounds: ink, then paper for the statement, ink for the demo, paper for the end.
+        const up = inOut(prog(t, T.paperIn, T.paperIn + 0.55));
+        const down = inOut(prog(t, T.paperOut, T.paperOut + 0.55));
+        const end = inOut(prog(t, T.endIn, T.endIn + 0.6));
+        let clip = `inset(${(1 - up) * 100}% 0 0 0)`;
+        if (t >= T.paperOut) clip = `inset(0 0 ${down * 100}% 0)`;
+        if (t >= T.endIn) clip = `inset(${(1 - end) * 100}% 0 0 0)`;
+        $("paper").style.clipPath = clip;
+
+        // 1 · intro: a carousel of brand swatches gathers into the octagon.
+        const s1 = t < 3.9;
+        $("stage1").style.display = s1 ? "block" : "none";
+        if (s1) {
+          const slide = out3(prog(t, 0, 1.5));
+          const gather = inOut(prog(t, 1.25, 2.05));
+          cards.forEach((el, i) => {
+            const base = (i - (cards.length - 1) / 2) * 230 + lerp(700, -60, slide);
+            const x = lerp(base, 0, gather);
+            const dist = Math.min(Math.abs(x) / 1100, 1);
+            const scale = lerp(1.25 - dist * 0.55, 0.25, gather);
+            const rot = clamp(-x / 22, -60, 60) * (1 - gather);
+            set(el, {
+              transform: `translateX(${x}px) rotateY(${rot}deg) scale(${scale})`,
+              opacity: (1 - gather) * clamp(1.4 - dist),
+              zIndex: String(100 - Math.round(dist * 50)),
+            });
+          });
+          const draw = out3(prog(t, 1.75, 2.55));
+          const grow = out3(prog(t, 1.75, 2.6));
+          const path = $("octPath");
+          path.setAttribute("d", octagon(W / 2, H / 2 + 20, lerp(160, 560, grow), lerp(110, 300, grow), lerp(40, 110, grow)));
+          const len = path.getTotalLength();
+          set(path, { strokeDasharray: `${len}`, strokeDashoffset: `${len * (1 - draw)}` });
+          const word = "/taste review";
+          const typed = Math.round(word.length * prog(t, 2.1, 2.75));
+          $("title").innerHTML =
+            `<span style="color:#959595">${word.slice(0, Math.min(1, typed))}</span>` +
+            word.slice(1, typed) +
+            `<span style="opacity:${typed < word.length || Math.floor(t * 2.5) % 2 ? 1 : 0};color:#959595">_</span>`;
+          set($("titleSub"), fadeIn(t, 2.7, 0.5, 16));
+          set($("engine"), { opacity: out3(prog(t, 0.2, 0.7)) * (1 - prog(t, 1.6, 2.0)) });
+          $("stage1").style.opacity = 1 - prog(t, 3.35, 3.7);
+        }
+
+        // 2 · the statement, on paper.
+        const s2 = t >= 3.6 && t < 8.3;
+        $("stage2").style.display = s2 ? "block" : "none";
+        if (s2) {
+          set($("s2a"), fadeIn(t, 3.85, 0.6, 40));
+          set($("s2b"), fadeIn(t, 4.25, 0.6, 40));
+          set($("s2c"), fadeIn(t, 5.0, 0.6, 24));
+          set($("s2d"), fadeIn(t, 5.9, 0.5, 18));
+          $("stage2").style.opacity = 1 - prog(t, 7.55, 7.85);
+        }
+
+        // 3 · the pull request, on ink.
+        const s3 = t >= 7.9 && t < 24.4;
+        $("stage3").style.display = s3 ? "block" : "none";
+        if (s3) {
+          const enter = out3(prog(t, 8.1, 8.8));
+          const push = lerp(0.97, 1.0, prog(t, 8.1, 12.5));
+          const dim = 1 - 0.7 * out3(prog(t, 12.5, 13.1)) + 0.7 * out3(prog(t, 16.4, 16.9)) - 0.7 * out3(prog(t, 20.4, 20.9));
+          set($("browser"), {
+            opacity: enter * clamp(dim),
+            transform: `translateY(${(1 - enter) * 60}px) scale(${push})`,
+            transformOrigin: "50% 40%",
+          });
+          set($("label1"), { ...fadeIn(t, 8.3, 0.5, 10), opacity: out3(prog(t, 8.3, 8.8)) * (1 - prog(t, 16.3, 16.6)) });
+          set($("label2"), { opacity: out3(prog(t, 16.7, 17.2)) * (1 - prog(t, 20.3, 20.6)) });
+
+          // the composer: /taste review typed and sent
+          const comp = out3(prog(t, 9.6, 10.1)) * (1 - prog(t, 12.2, 12.5));
+          set($("composer"), { opacity: comp, transform: `translateY(${(1 - out3(prog(t, 9.6, 10.1))) * 30}px)` });
+          const cmd = "/taste review";
+          $("typed").textContent = cmd.slice(0, Math.round(cmd.length * prog(t, 10.2, 10.95)));
+          const pressed = t > 11.15 && t < 11.35;
+          set($("commentBtn"), { transform: pressed ? "scale(0.94)" : "scale(1)", background: pressed ? "#2ea043" : "#238636" });
+          const spin = ["◜", "◝", "◞", "◟"][Math.floor(t * 8) % 4];
+          $("running").textContent = t > 11.4 && t < 12.5 ? `${spin}  scoring the preview against production` : "";
+
+          // the first review: the drop
+          const c1in = out3(prog(t, 12.5, 13.2));
+          const c1out = prog(t, 16.0, 16.4);
+          const zoom1 = inOut(prog(t, 14.3, 15.2));
+          placeShot($("c1"), $("hl1"), {
+            enter: c1in,
+            exit: c1out,
+            imgW: 1632,
+            imgH: 1224,
+            row: [35, 335, 845, 402],
+            zoom: zoom1,
+            outline: out3(prog(t, 13.5, 13.9)),
+            t,
+          });
+
+          // the fix: a wipe from the off-brand page to the fixed one
+          const wipe = inOut(prog(t, 17.6, 18.9));
+          $("fixed").style.clipPath = `inset(0 ${(1 - wipe) * 100}% 0 0)`;
+          set($("wipe"), { left: `${wipe * 100}%`, opacity: wipe > 0 && wipe < 1 ? 1 : 0 });
+          const tags = out3(prog(t, 17.2, 17.6)) * (1 - prog(t, 20.3, 20.6));
+          $("before").style.opacity = tags * (1 - out3(prog(t, 18.5, 18.9)));
+          $("after").style.opacity = out3(prog(t, 17.9, 18.3)) * (1 - prog(t, 20.3, 20.6));
+          $("url").textContent = wipe > 0.5 ? "preview 43ae182 · /pricing" : "preview dae0b57 · /pricing";
+
+          // the second review: the recovery
+          const c2in = out3(prog(t, 20.5, 21.2));
+          const c2out = prog(t, 23.6, 24.0);
+          const zoom2 = inOut(prog(t, 22.0, 22.9));
+          placeShot($("c2"), $("hl2"), {
+            enter: c2in,
+            exit: c2out,
+            imgW: 1632,
+            imgH: 968,
+            row: [745, 335, 1025, 402],
+            zoom: zoom2,
+            maxZoom: 1.45,
+            outline: out3(prog(t, 21.4, 21.8)),
+            t,
+          });
+        }
+
+        // 4 · the end card, on paper.
+        const s4 = t >= 23.9;
+        $("stage4").style.display = s4 ? "block" : "none";
+        if (s4) {
+          set($("scores"), fadeIn(t, 24.3, 0.6, 30));
+          const count = out3(prog(t, 24.8, 25.8));
+          $("scoreTo").textContent = lerp(0.35, 0.9, count).toFixed(2);
+          set($("e1"), fadeIn(t, 25.4, 0.5, 24));
+          set($("e2"), fadeIn(t, 25.75, 0.5, 24));
+          set($("e3"), fadeIn(t, 26.1, 0.5, 24));
+          set($("e4"), fadeIn(t, 26.6, 0.5, 16));
+          set($("e5"), fadeIn(t, 26.9, 0.5, 10));
+        }
+      }
+
+      // A review comment rises over the page, its key row outlined, then the camera pushes into that row.
+      function placeShot(shot, hl, o) {
+        const scale = 1000 / o.imgW;
+        const h = o.imgH * scale;
+        const baseX = (W - 1000) / 2;
+        const baseY = (H - h) / 2 + 30;
+        const [x1, y1, x2, y2] = o.row.map((v) => v * scale);
+        const rowCx = (x1 + x2) / 2;
+        const rowCy = (y1 + y2) / 2;
+        const z = lerp(1, o.maxZoom ?? 1.9, o.zoom);
+        const tx = lerp(baseX, W / 2 - rowCx * z, o.zoom);
+        const ty = lerp(baseY, H / 2 - rowCy * z, o.zoom) + (1 - o.enter) * 500;
+        const visible = o.enter * (1 - o.exit);
+        set(shot, { opacity: visible, transform: `translate(${tx}px, ${ty}px) scale(${z})` });
+        const pad = 10;
+        const pulse = 0.5 + 0.5 * Math.sin(o.t * 6);
+        set(hl, {
+          left: `${tx + (x1 - pad) * z}px`,
+          top: `${ty + (y1 - pad) * z}px`,
+          width: `${(x2 - x1 + pad * 2) * z}px`,
+          height: `${(y2 - y1 + pad * 2) * z}px`,
+          opacity: visible * o.outline,
+          boxShadow: `0 0 ${18 + pulse * 22}px currentColor`,
+          color: hl.style.borderColor,
+        });
+      }
+
+      window.seek = seek;
+      window.TOTAL = T.total;
+      document.fonts.ready.then(() => {
+        window.ready = true;
+      });
+      seek(Number(new URLSearchParams(location.search).get("t") ?? 0));
+    </script>
+  </body>
+</html>
