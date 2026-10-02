@@ -125,12 +125,44 @@
         border: 1px solid #ffffff33;
         color: #f5f7f2;
       }
+      .callout {
+        position: absolute;
+        border: 3px solid #ff4c24;
+        border-radius: 10px;
+        box-shadow: 0 0 24px #ff4c2480;
+      }
+      .callout span,
+      .check span {
+        position: absolute;
+        white-space: nowrap;
+        font-family: "Azeret Mono", monospace;
+        font-size: 18px;
+        padding: 7px 12px;
+        border-radius: 6px;
+      }
+      .callout span {
+        background: #ff4c24;
+        color: #1e1e1e;
+        font-weight: 500;
+      }
+      .check {
+        position: absolute;
+      }
+      .check span {
+        background: #1e1e1e;
+        color: #f5f7f2;
+        border: 1px solid #3f6b3a;
+      }
+      .check span::before {
+        content: "✓ ";
+        color: #6fcf73;
+      }
       .spec {
         display: grid;
         grid-template-columns: 56px 1fr;
         align-items: center;
         gap: 22px;
-        padding: 22px 0;
+        padding: 20px 0;
         border-top: 1px solid #0000001a;
       }
       .spec .sw {
@@ -153,6 +185,39 @@
       .spec div {
         font-size: 25px;
         color: #1e1e1e;
+      }
+      #caption {
+        position: absolute;
+        left: 50%;
+        bottom: 46px;
+        max-width: 1500px;
+        transform: translateX(-50%);
+        padding: 18px 30px;
+        border-radius: 12px;
+        background: #111111eb;
+        border: 1px solid #ffffff1f;
+        font-size: 34px;
+        font-weight: 400;
+        line-height: 1.3;
+        color: #f5f7f2;
+        text-align: center;
+        white-space: nowrap;
+      }
+      #caption b {
+        font-weight: 600;
+      }
+      #caption code {
+        font-family: "Azeret Mono", monospace;
+        font-size: 30px;
+        padding: 0 6px;
+        border-radius: 4px;
+        background: #ffffff1a;
+      }
+      #grain {
+        pointer-events: none;
+        opacity: 0.07;
+        mix-blend-mode: overlay;
+        background-size: 360px 360px;
       }
     </style>
   </head>
@@ -181,7 +246,7 @@
         class="layer"
         style="display: flex; align-items: center; justify-content: center; padding-top: 190px; font-size: 30px; color: #959595"
       >
-        built on the Taste Engine API
+        brand review for pull requests, built on the Taste Engine API
       </div>
     </div>
 
@@ -199,18 +264,18 @@
 
     <div id="stageBrand" class="layer" style="color: #1e1e1e">
       <div class="label mono" style="color: #959595"><b style="color: #1e1e1e">00</b>the brand · live in production</div>
-      <div id="homeFrame" class="frame" style="left: 96px; top: 140px; width: 1140px; border: 1px solid #0000001a">
+      <div id="homeFrame" class="frame" style="left: 96px; top: 130px; width: 1140px; border: 1px solid #0000001a">
         <div class="bar mono" style="background: #eaece7; color: #959595">
           <i style="background: #0000001a"></i><i style="background: #0000001a"></i><i style="background: #0000001a"></i
           ><span>taste-review-demo.vercel.app</span>
         </div>
         <img src="assets/home-production.png" />
       </div>
-      <div id="specs" style="position: absolute; left: 1330px; top: 190px; width: 500px">
+      <div id="specs" style="position: absolute; left: 1330px; top: 150px; width: 500px">
         <div class="spec"><span class="sw" style="background: #f6f1e7; font-family: Georgia, serif">Aa</span><div><small class="mono">type</small>Fraunces, weight 500</div></div>
         <div class="spec"><span class="sw" style="background: #3f6b3a"></span><div><small class="mono">accent</small><span class="mono">#3F6B3A</span> moss</div></div>
         <div class="spec"><span class="sw" style="background: #f6f1e7"></span><div><small class="mono">surface</small><span class="mono">#F6F1E7</span> paper</div></div>
-        <div class="spec"><span class="sw" style="background: #f5f7f2; border-radius: 4px; border: 2px solid #1f2a1f"></span><div><small class="mono">corners</small>4px, nothing rounder</div></div>
+        <div class="spec"><span class="sw" style="background: #f5f7f2; border: 2px solid #1f2a1f"></span><div><small class="mono">corners</small>4px, nothing rounder</div></div>
         <div class="spec"><span class="sw" style="background: #f5f7f2; font-size: 28px">∅</span><div><small class="mono">rule</small>no gradients, no shadows</div></div>
       </div>
     </div>
@@ -218,10 +283,7 @@
     <div id="stage3" class="layer dark">
       <div id="label1" class="label mono"><b style="color: #f5f7f2">01</b>the agent's pull request</div>
       <div id="label2" class="label mono"><b style="color: #f5f7f2">02</b>the agent applies the fixes</div>
-      <div
-        id="prTitle"
-        style="position: absolute; left: 230px; top: 104px; display: flex; align-items: center; gap: 14px; font-size: 24px; font-weight: 500"
-      >
+      <div id="prTitle" style="position: absolute; left: 230px; top: 104px; display: flex; align-items: center; gap: 14px; font-size: 24px; font-weight: 500">
         <span style="font-size: 16px; font-weight: 600; padding: 5px 12px; border-radius: 999px; background: #238636; color: #fff">Open</span>
         Redesign the pricing page <span style="color: #959595; font-weight: 300">#4</span>
       </div>
@@ -234,62 +296,68 @@
           <div id="wipe" style="position: absolute; top: 0; bottom: 0; width: 3px; background: #1e1e1e"></div>
         </div>
       </div>
+
+      <div id="calloutHeading" class="callout" style="left: 625px; top: 378px; width: 510px; height: 64px"><span style="left: 524px; top: 12px">bold sans · not Fraunces</span></div>
+      <div id="calloutBadge" class="callout" style="left: 822px; top: 336px; width: 116px; height: 40px"><span style="right: 130px; top: 2px">violet · off palette</span></div>
+      <div id="calloutButton" class="callout" style="left: 742px; top: 876px; width: 278px; height: 60px"><span style="left: 292px; top: 10px">gradient pills · not moss</span></div>
+      <div id="calloutCard" class="callout" style="left: 356px; top: 532px; width: 340px; height: 418px"><span style="left: 0; top: -46px">white + shadows · not paper</span></div>
+
+      <div id="checkHeading" class="check" style="left: 930px; top: 395px"><span>Fraunces</span></div>
+      <div id="checkBadge" class="check" style="left: 460px; top: 339px"><span>moss badge</span></div>
+      <div id="checkButton" class="check" style="left: 742px; top: 890px"><span>moss buttons</span></div>
+      <div id="checkCard" class="check" style="left: 1100px; top: 570px"><span>paper + hairlines</span></div>
+
       <div
         id="vercel"
         style="position: absolute; left: 1250px; top: 214px; display: flex; align-items: center; gap: 12px; padding: 12px 18px; border-radius: 10px; background: #000; border: 1px solid #333; box-shadow: 0 20px 60px #00000080; font-size: 19px; color: #ededed"
       >
         <span style="font-size: 16px">▲</span><b style="font-weight: 600">Vercel</b
-        ><span style="width: 9px; height: 9px; border-radius: 50%; background: #50e3c2"></span><span style="color: #a1a1a1">Preview ready</span>
+        ><span style="width: 9px; height: 9px; border-radius: 50%; background: #50e3c2"></span><span id="vercelText" style="color: #a1a1a1">Preview ready</span>
       </div>
       <div id="after" class="tag mono" style="left: 230px; top: 104px">after · 43ae182</div>
       <div id="before" class="tag mono" style="right: 390px; top: 104px">before · dae0b57</div>
 
       <div
         id="composer"
-        style="position: absolute; left: 1180px; top: 760px; width: 620px; border-radius: 14px; background: #0d1117; border: 1px solid #30363d; padding: 22px 24px; box-shadow: 0 30px 80px #000000a0"
+        style="position: absolute; left: 1180px; top: 700px; width: 620px; border-radius: 14px; background: #0d1117; border: 1px solid #30363d; padding: 22px 24px; box-shadow: 0 30px 80px #000000a0"
       >
         <div id="composerHead" style="font-size: 18px; color: #8b949e; margin-bottom: 12px">Add a comment</div>
-        <div
-          id="typed"
-          class="mono"
-          style="height: 64px; border-radius: 8px; border: 1px solid #30363d; background: #010409; padding: 18px; font-size: 24px; color: #f0f6fc"
-        ></div>
+        <div id="typed" class="mono" style="height: 64px; border-radius: 8px; border: 1px solid #30363d; background: #010409; padding: 18px; font-size: 24px; color: #f0f6fc"></div>
         <div style="display: flex; justify-content: flex-end; margin-top: 14px">
-          <div id="commentBtn" style="font-size: 18px; font-weight: 600; padding: 9px 18px; border-radius: 8px; background: #238636; color: #fff">
-            Comment
-          </div>
+          <div id="commentBtn" style="font-size: 18px; font-weight: 600; padding: 9px 18px; border-radius: 8px; background: #238636; color: #fff">Comment</div>
         </div>
       </div>
-      
+      <div id="ripple" style="position: absolute; width: 20px; height: 20px; border-radius: 50%; border: 3px solid #f5f7f2"></div>
+      <svg id="cursor" width="34" height="40" viewBox="0 0 34 40" style="position: absolute; filter: drop-shadow(0 6px 10px #000a)">
+        <path d="M3 2 L3 32 L11 25 L16 37 L22 34 L17 23 L28 23 Z" fill="#fff" stroke="#111" stroke-width="2" stroke-linejoin="round" />
+      </svg>
 
       <div id="c1" class="shot" style="width: 1000px"><img src="assets/comment-1.png" /></div>
       <div id="c2" class="shot" style="width: 1000px"><img src="assets/comment-2.png" /></div>
       <div id="hl1" class="hl" style="border-color: #ff4c24"></div>
-      <div id="hl2" class="hl" style="border-color: #f5f7f2"></div>
+      <div id="hl1b" class="hl" style="border-color: #f5f7f2"></div>
+      <div id="hl2" class="hl" style="border-color: #6fcf73"></div>
     </div>
 
     <div id="stage4" class="layer" style="color: #1e1e1e">
-      <div
-        id="scores"
-        style="position: absolute; left: 160px; top: 190px; font-size: 168px; font-weight: 400; letter-spacing: -0.03em; font-variant-numeric: tabular-nums"
-      >
+      <div id="scores" style="position: absolute; left: 160px; top: 160px; font-size: 168px; font-weight: 400; letter-spacing: -0.03em; font-variant-numeric: tabular-nums">
         <span style="color: #959595">0.35</span><span style="color: #959595; margin: 0 40px">→</span><span id="scoreTo">0.35</span>
       </div>
-      <div id="e1" style="position: absolute; left: 160px; top: 480px; font-size: 56px; font-weight: 400">Extract a brand from any live site.</div>
-      <div id="e2" style="position: absolute; left: 160px; top: 558px; font-size: 56px; font-weight: 400">Verify any page against it.</div>
-      <div id="e3" style="position: absolute; left: 160px; top: 636px; font-size: 56px; font-weight: 400">Fix it before it merges.</div>
-      <div id="e4" class="mono" style="position: absolute; left: 160px; top: 760px; font-size: 26px; color: #666562">
+      <div id="e1" style="position: absolute; left: 160px; top: 440px; font-size: 56px; font-weight: 400">Extract a brand from any live site.</div>
+      <div id="e2" style="position: absolute; left: 160px; top: 518px; font-size: 56px; font-weight: 400">Verify any page against it.</div>
+      <div id="e3" style="position: absolute; left: 160px; top: 596px; font-size: 56px; font-weight: 400">Fix it before it merges.</div>
+      <div id="e4" class="mono" style="position: absolute; left: 160px; top: 724px; font-size: 26px; color: #666562">
         works with Vercel preview deployments · one workflow file
       </div>
-      <div
-        id="e5"
-        class="mono"
-        style="position: absolute; left: 160px; right: 160px; bottom: 90px; display: flex; justify-content: space-between; font-size: 24px; border-top: 1px solid #0000001a; padding-top: 30px"
-      >
+      <div id="e5" class="mono" style="position: absolute; left: 160px; right: 160px; bottom: 90px; display: flex; justify-content: space-between; font-size: 24px; border-top: 1px solid #0000001a; padding-top: 30px">
         <span><span style="color: #959595">/</span>taste review · built on the Taste Engine API</span>
         <span>github.com/mfbz/taste-review</span>
       </div>
     </div>
+
+    <div id="vignette" class="layer" style="top: auto; height: 300px; background: linear-gradient(#00000000, #000000b3)"></div>
+    <div id="caption"></div>
+    <div id="grain" class="layer"></div>
 
     <script>
       const W = 1920;
@@ -301,25 +369,44 @@
       const lerp = (a, b, x) => a + (b - a) * x;
       const $ = (id) => document.getElementById(id);
       const set = (el, style) => Object.assign(el.style, style);
-      const fadeIn = (t, a, d = 0.45, dy = 30) => {
+      const between = (t, a, b) => t >= a && t < b;
+      const fadeIn = (t, a, d = 0.5, dy = 30) => {
         const x = out3(prog(t, a, a + d));
         return { opacity: x, transform: `translateY(${(1 - x) * dy}px)` };
       };
-      const between = (t, a, b) => t >= a && t < b;
+      // on, then off: a window with soft edges
+      const span = (t, a, b, edge = 0.35) => out3(prog(t, a, a + edge)) * (1 - prog(t, b - edge, b));
 
-      // The swatches the extractor read from tastelabs.com and from the demo brand.
+      const TOTAL = 46;
+
+      // Each caption is on screen long enough to read twice.
+      const CAPTIONS = [
+        [8.5, 13.8, "Fernhill’s live site is the reference. The Taste Engine reads its brand straight from production."],
+        [14.6, 18.0, "A coding agent opens a pull request that redesigns <b>/pricing</b>. Spot the problems?"],
+        [18.2, 20.7, "Vercel deploys a preview. Anyone on the team comments <code>/taste review</code>."],
+        [20.9, 22.5, "The action sends the preview and production to the Taste Engine."],
+        [22.7, 25.5, "Same page, same brand: production scores <b>0.95</b>, the preview <b>0.35</b>."],
+        [25.7, 28.4, "Every fix comes worst first, with the exact values the agent needs."],
+        [28.8, 33.8, "The agent applies the fixes and pushes. Vercel deploys a new preview."],
+        [34.2, 39.2, "Ask again: <b>0.90</b>, up 0.55. Back on brand before it merges."],
+      ];
+
       const SWATCHES = ["#F5F7F2", "#3F6B3A", "#0000EE", "#EDE5D3", "#1E1E1E", "#FF4C24", "#F6F1E7", "#8B8B8B", "#111111", "#EAECE7", "#2F5229"];
-      const INK = { "#F5F7F2": 1, "#EDE5D3": 1, "#FF4C24": 1, "#F6F1E7": 1, "#EAECE7": 1 };
+      const LIGHT = new Set(["#F5F7F2", "#EDE5D3", "#FF4C24", "#F6F1E7", "#EAECE7"]);
       const cards = SWATCHES.map((hex) => {
         const el = document.createElement("div");
         el.className = "card mono";
         el.style.background = hex;
-        el.style.color = INK[hex] ? "#1e1e1e" : "#f5f7f2";
+        el.style.color = LIGHT.has(hex) ? "#1e1e1e" : "#f5f7f2";
         el.textContent = hex;
         $("cards").appendChild(el);
         return el;
       });
       const specs = [...document.querySelectorAll("#specs .spec")];
+
+      // Film grain: one noise tile, shifted every frame.
+      $("grain").style.backgroundImage =
+        "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='360' height='360'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>\")";
 
       function octagon(cx, cy, rx, ry, c) {
         const pts = [
@@ -335,45 +422,69 @@
         return "M" + pts.map((p) => p.join(",")).join("L") + "Z";
       }
 
-      // A review comment rises over the page, its key row outlined, then the camera pushes into that row.
-      function placeShot(shot, hl, o) {
+      // A comment shot and a camera that moves through focus states: the whole comment, then each rect.
+      function placeShot(shot, o) {
         const scale = 1000 / o.imgW;
         const h = o.imgH * scale;
-        const baseX = (W - 1000) / 2;
-        const baseY = (H - h) / 2 + 30;
-        const [x1, y1, x2, y2] = o.row.map((v) => v * scale);
-        const z = lerp(1, o.maxZoom, o.zoom);
-        const tx = lerp(baseX, W / 2 - ((x1 + x2) / 2) * z, o.zoom);
-        const ty = lerp(baseY, H / 2 - ((y1 + y2) / 2) * z, o.zoom) + (1 - o.enter) * 500;
+        const states = [{ tx: (W - 1000) / 2, ty: (H - h) / 2 - 20, z: 1 }];
+        for (const f of o.focus) {
+          const [x1, y1, x2, y2] = f.rect.map((v) => v * scale);
+          states.push({ tx: W / 2 - ((x1 + x2) / 2) * f.z, ty: H / 2 - 40 - ((y1 + y2) / 2) * f.z, z: f.z });
+        }
+        let cam = states[0];
+        o.moves.forEach((m, i) => {
+          const next = states[i + 1];
+          cam = { tx: lerp(cam.tx, next.tx, m), ty: lerp(cam.ty, next.ty, m), z: lerp(cam.z, next.z, m) };
+        });
         const visible = o.enter * (1 - o.exit);
-        set(shot, { opacity: visible, transform: `translate(${tx}px, ${ty}px) scale(${z})` });
-        const pad = 10;
-        const pulse = 0.5 + 0.5 * Math.sin(o.t * 6);
-        set(hl, {
-          left: `${tx + (x1 - pad) * z}px`,
-          top: `${ty + (y1 - pad) * z}px`,
-          width: `${(x2 - x1 + pad * 2) * z}px`,
-          height: `${(y2 - y1 + pad * 2) * z}px`,
-          opacity: visible * o.outline,
-          boxShadow: `0 0 ${18 + pulse * 22}px ${hl.style.borderColor}`,
+        set(shot, { opacity: visible, transform: `translate(${cam.tx}px, ${cam.ty + (1 - o.enter) * 500}px) scale(${cam.z})` });
+        o.focus.forEach((f, i) => {
+          if (!f.hl) return;
+          const [x1, y1, x2, y2] = f.rect.map((v) => v * scale);
+          const pad = 10;
+          const pulse = 0.5 + 0.5 * Math.sin(o.t * 6);
+          set(f.hl, {
+            left: `${cam.tx + (x1 - pad) * cam.z}px`,
+            top: `${cam.ty + (1 - o.enter) * 500 + (y1 - pad) * cam.z}px`,
+            width: `${(x2 - x1 + pad * 2) * cam.z}px`,
+            height: `${(y2 - y1 + pad * 2) * cam.z}px`,
+            opacity: visible * f.outline,
+            boxShadow: `0 0 ${16 + pulse * 20}px ${f.hl.style.borderColor}`,
+          });
         });
       }
 
-      const TOTAL = 28.8;
-
       function seek(t) {
-        // Paper rises for the statement and the brand, ink returns for the pull request, paper closes.
-        const up = inOut(prog(t, 3.15, 3.65));
-        const down = inOut(prog(t, 9.75, 10.25));
-        const end = inOut(prog(t, 23.6, 24.15));
+        // backgrounds: paper rises for the hook and the brand, ink returns for the pull request, paper closes
+        const up = inOut(prog(t, 3.2, 3.75));
+        const down = inOut(prog(t, 13.8, 14.35));
+        const end = inOut(prog(t, 39.2, 39.8));
         let clip = `inset(${(1 - up) * 100}% 0 0 0)`;
-        if (t >= 9.75) clip = `inset(0 0 ${down * 100}% 0)`;
-        if (t >= 23.6) clip = `inset(${(1 - end) * 100}% 0 0 0)`;
+        if (t >= 13.8) clip = `inset(0 0 ${down * 100}% 0)`;
+        if (t >= 39.2) clip = `inset(${(1 - end) * 100}% 0 0 0)`;
         $("paper").style.clipPath = clip;
 
-        // intro: the swatch carousel gathers into the octagon
-        $("stage1").style.display = between(t, 0, 3.6) ? "block" : "none";
-        if (t < 3.6) {
+        // caption
+        const cap = CAPTIONS.find(([a, b]) => between(t, a, b));
+        const capEl = $("caption");
+        if (cap) {
+          if (capEl.dataset.key !== cap[2]) {
+            capEl.innerHTML = cap[2];
+            capEl.dataset.key = cap[2];
+          }
+          const v = span(t, cap[0], cap[1], 0.3);
+          set(capEl, { opacity: v, transform: `translateX(-50%) translateY(${(1 - out3(prog(t, cap[0], cap[0] + 0.35))) * 16}px)` });
+        } else capEl.style.opacity = 0;
+
+        $("vignette").style.opacity = span(t, 14.3, 39.3, 0.5);
+
+        // grain
+        const g = Math.floor(t * 24);
+        $("grain").style.backgroundPosition = `${(g * 97) % 360}px ${(g * 61) % 360}px`;
+
+        // intro
+        $("stage1").style.display = t < 3.7 ? "block" : "none";
+        if (t < 3.7) {
           const slide = out3(prog(t, 0, 1.3));
           const gather = inOut(prog(t, 1.05, 1.8));
           cards.forEach((el, i) => {
@@ -389,7 +500,7 @@
           set($("engine"), { opacity: out3(prog(t, 0.15, 0.6)) * (1 - prog(t, 1.4, 1.75)) });
           const grow = out3(prog(t, 1.5, 2.3));
           const path = $("octPath");
-          path.setAttribute("d", octagon(W / 2, H / 2 + 20, lerp(160, 560, grow), lerp(110, 300, grow), lerp(40, 110, grow)));
+          path.setAttribute("d", octagon(W / 2, H / 2 + 20, lerp(160, 620, grow), lerp(110, 300, grow), lerp(40, 110, grow)));
           const len = path.getTotalLength();
           set(path, { strokeDasharray: `${len}`, strokeDashoffset: `${len * (1 - out3(prog(t, 1.5, 2.25)))}` });
           const word = "/taste review";
@@ -398,100 +509,125 @@
             `<span style="color:#959595">${word.slice(0, Math.min(1, typed))}</span>` +
             word.slice(1, typed) +
             `<span style="opacity:${typed < word.length || Math.floor(t * 2.5) % 2 ? 1 : 0};color:#959595">_</span>`;
-          set($("titleSub"), fadeIn(t, 2.4, 0.4, 16));
-          $("stage1").style.opacity = 1 - prog(t, 3.05, 3.4);
+          set($("titleSub"), fadeIn(t, 2.45, 0.4, 16));
+          $("stage1").style.opacity = 1 - prog(t, 3.1, 3.5);
         }
 
-        // statement: the problem, then the API as the answer
-        $("stage2").style.display = between(t, 3.3, 6.5) ? "block" : "none";
-        if (between(t, 3.3, 6.5)) {
-          set($("s2a"), fadeIn(t, 3.55, 0.45, 40));
-          set($("s2b"), fadeIn(t, 3.95, 0.45, 40));
-          set($("s2c"), fadeIn(t, 4.75, 0.35, 0));
+        // hook
+        $("stage2").style.display = between(t, 3.4, 8.1) ? "block" : "none";
+        if (between(t, 3.4, 8.1)) {
+          set($("s2a"), fadeIn(t, 3.8, 0.5, 40));
+          set($("s2b"), fadeIn(t, 4.6, 0.5, 40));
+          set($("s2c"), fadeIn(t, 5.7, 0.35, 0));
           $("caret").style.opacity = Math.floor(t * 2.5) % 2 ? 1 : 0;
-          $("stage2").style.opacity = 1 - prog(t, 6.05, 6.35);
+          $("stage2").style.opacity = 1 - prog(t, 7.6, 7.95);
         }
 
-        // the brand: production, and what defines it
-        $("stageBrand").style.display = between(t, 6.2, 10.0) ? "block" : "none";
-        if (between(t, 6.2, 10.0)) {
-          const enter = out3(prog(t, 6.35, 6.95));
-          set($("homeFrame"), { opacity: enter, transform: `translateY(${(1 - enter) * 50}px) scale(${lerp(0.98, 1, prog(t, 6.35, 9.8))})` });
-          specs.forEach((el, i) => set(el, fadeIn(t, 7.0 + i * 0.28, 0.35, 18)));
-          $("stageBrand").style.opacity = 1 - prog(t, 9.55, 9.8);
+        // the brand
+        $("stageBrand").style.display = between(t, 7.8, 14.0) ? "block" : "none";
+        if (between(t, 7.8, 14.0)) {
+          const enter = out3(prog(t, 8.0, 8.7));
+          set($("homeFrame"), { opacity: enter, transform: `translateY(${(1 - enter) * 50}px) scale(${lerp(0.97, 1.0, prog(t, 8.0, 13.8))})` });
+          specs.forEach((el, i) => set(el, fadeIn(t, 9.0 + i * 0.55, 0.45, 18)));
+          $("stageBrand").style.opacity = 1 - prog(t, 13.5, 13.85);
         }
 
-        // the pull request, the reviews and the fix, on ink
-        $("stage3").style.display = between(t, 9.9, 23.9) ? "block" : "none";
-        if (between(t, 9.9, 23.9)) {
-          const enter = out3(prog(t, 10.1, 10.7));
-          const dim =
-            1 - 0.7 * out3(prog(t, 13.6, 14.1)) + 0.7 * out3(prog(t, 16.8, 17.2)) - 0.7 * out3(prog(t, 20.6, 21.0));
+        // the pull request, the reviews and the fix
+        $("stage3").style.display = between(t, 14.0, 39.4) ? "block" : "none";
+        if (between(t, 14.0, 39.4)) {
+          const enter = out3(prog(t, 14.3, 14.9));
+          const dim = 1 - 0.7 * out3(prog(t, 22.4, 22.9)) + 0.7 * out3(prog(t, 28.3, 28.7)) - 0.7 * out3(prog(t, 34.0, 34.4));
           set($("browser"), {
             opacity: enter * clamp(dim),
-            transform: `translateY(${(1 - enter) * 60}px) scale(${lerp(0.97, 1, prog(t, 10.1, 13.6))})`,
+            transform: `translateY(${(1 - enter) * 60}px) scale(${lerp(0.97, 1, prog(t, 14.3, 22.4))})`,
             transformOrigin: "50% 40%",
           });
-          set($("label1"), { opacity: out3(prog(t, 10.2, 10.6)) * (1 - prog(t, 16.8, 17.1)) });
-          set($("prTitle"), { ...fadeIn(t, 10.35, 0.4, 10), opacity: out3(prog(t, 10.35, 10.75)) * (1 - prog(t, 13.5, 13.8)) });
-          set($("label2"), { opacity: out3(prog(t, 17.1, 17.5)) * (1 - prog(t, 20.5, 20.8)) });
+          set($("label1"), { opacity: span(t, 14.4, 28.4) });
+          set($("prTitle"), { opacity: span(t, 14.55, 22.4) });
+          set($("label2"), { opacity: span(t, 28.6, 34.0) });
 
-          const comp = out3(prog(t, 11.2, 11.6));
-          set($("composer"), { opacity: comp * (1 - prog(t, 13.3, 13.6)), transform: `translateY(${(1 - comp) * 30}px)` });
+          // what is off brand, one by one
+          [["calloutHeading", 15.4], ["calloutBadge", 15.95], ["calloutButton", 16.5], ["calloutCard", 17.05]].forEach(([id, a]) => {
+            const v = out3(prog(t, a, a + 0.3)) * (1 - prog(t, 18.0, 18.3));
+            set($(id), { opacity: v, transform: `scale(${lerp(1.08, 1, out3(prog(t, a, a + 0.3)))})` });
+          });
+
+          // Vercel, the command, the click
+          const ready = out3(prog(t, 18.2, 18.55));
+          set($("vercel"), { opacity: ready * (1 - prog(t, 22.2, 22.5)), transform: `translateY(${(1 - ready) * -16}px)` });
+          const comp = out3(prog(t, 18.7, 19.1));
+          set($("composer"), { opacity: comp * (1 - prog(t, 22.2, 22.5)), transform: `translateY(${(1 - comp) * 30}px)` });
           const cmd = "/taste review";
-          $("typed").textContent = cmd.slice(0, Math.round(cmd.length * prog(t, 11.6, 12.25)));
-          const pressed = t > 12.4 && t < 12.58;
+          $("typed").textContent = cmd.slice(0, Math.round(cmd.length * prog(t, 19.15, 19.9)));
+          const cursorIn = inOut(prog(t, 19.9, 20.5));
+          set($("cursor"), {
+            left: `${lerp(1460, 1700, cursorIn)}px`,
+            top: `${lerp(600, 845, cursorIn)}px`,
+            opacity: span(t, 19.8, 21.4, 0.2),
+          });
+          const pressed = between(t, 20.55, 20.75);
           set($("commentBtn"), { transform: pressed ? "scale(0.94)" : "scale(1)", background: pressed ? "#2ea043" : "#238636" });
+          const rip = prog(t, 20.6, 21.1);
+          set($("ripple"), {
+            left: `${1716 - rip * 40}px`,
+            top: `${854 - rip * 40}px`,
+            width: `${20 + rip * 80}px`,
+            height: `${20 + rip * 80}px`,
+            opacity: between(t, 20.6, 21.1) ? 1 - rip : 0,
+          });
+          const running = t > 20.75;
           const spin = ["◜", "◝", "◞", "◟"][Math.floor(t * 8) % 4];
-          const running = t > 12.65;
           $("composerHead").textContent = running ? `${spin}  scoring the Vercel preview against production` : "Add a comment";
           $("composerHead").style.fontFamily = running ? '"Azeret Mono", monospace' : "";
           $("composerHead").style.color = running ? "#f0f6fc" : "#8b949e";
-          const ready = out3(prog(t, 10.75, 11.1));
-          set($("vercel"), { opacity: ready * (1 - prog(t, 13.4, 13.7)), transform: `translateY(${(1 - ready) * -16}px)` });
 
-          placeShot($("c1"), $("hl1"), {
-            enter: out3(prog(t, 13.6, 14.2)),
-            exit: prog(t, 16.6, 16.95),
+          // the first review: the drop, then the fixes
+          placeShot($("c1"), {
+            enter: out3(prog(t, 22.5, 23.2)),
+            exit: prog(t, 28.1, 28.5),
             imgW: 1632,
             imgH: 1224,
-            row: [35, 335, 845, 402],
-            zoom: inOut(prog(t, 15.0, 15.8)),
-            maxZoom: 1.9,
-            outline: out3(prog(t, 14.35, 14.7)),
+            focus: [
+              { rect: [35, 335, 845, 402], z: 1.85, hl: $("hl1"), outline: out3(prog(t, 23.4, 23.8)) * (1 - prog(t, 25.4, 25.7)) },
+              { rect: [35, 500, 1600, 975], z: 1.15, hl: $("hl1b"), outline: out3(prog(t, 26.2, 26.6)) },
+            ],
+            moves: [inOut(prog(t, 23.9, 24.8)), inOut(prog(t, 25.5, 26.3))],
             t,
           });
 
-          const wipe = inOut(prog(t, 17.8, 19.0));
+          // the fix: the wipe, then what came back
+          const wipe = inOut(prog(t, 29.8, 31.2));
           $("fixed").style.clipPath = `inset(0 ${(1 - wipe) * 100}% 0 0)`;
           set($("wipe"), { left: `${wipe * 100}%`, opacity: wipe > 0 && wipe < 1 ? 1 : 0 });
-          $("before").style.opacity = out3(prog(t, 17.3, 17.6)) * (1 - out3(prog(t, 18.7, 19.0)));
-          $("after").style.opacity = out3(prog(t, 18.1, 18.4)) * (1 - prog(t, 20.5, 20.8));
+          $("before").style.opacity = out3(prog(t, 29.2, 29.5)) * (1 - out3(prog(t, 30.9, 31.2)));
+          $("after").style.opacity = span(t, 30.2, 34.0);
           $("url").textContent = wipe > 0.5 ? "vercel preview · 43ae182 · /pricing" : "vercel preview · dae0b57 · /pricing";
+          [["checkHeading", 31.5], ["checkBadge", 31.9], ["checkButton", 32.3], ["checkCard", 32.7]].forEach(([id, a]) => {
+            set($(id), { opacity: out3(prog(t, a, a + 0.3)) * (1 - prog(t, 33.8, 34.1)), transform: `translateY(${(1 - out3(prog(t, a, a + 0.3))) * 10}px)` });
+          });
 
-          placeShot($("c2"), $("hl2"), {
-            enter: out3(prog(t, 20.6, 21.2)),
-            exit: prog(t, 23.35, 23.7),
+          // the second review: the recovery
+          placeShot($("c2"), {
+            enter: out3(prog(t, 34.0, 34.6)),
+            exit: prog(t, 39.0, 39.4),
             imgW: 1632,
             imgH: 968,
-            row: [745, 335, 1025, 402],
-            zoom: inOut(prog(t, 22.0, 22.8)),
-            maxZoom: 1.45,
-            outline: out3(prog(t, 21.35, 21.7)),
+            focus: [{ rect: [35, 335, 1025, 402], z: 1.5, hl: $("hl2"), outline: out3(prog(t, 34.9, 35.3)) }],
+            moves: [inOut(prog(t, 35.6, 36.5))],
             t,
           });
         }
 
         // the end card
-        $("stage4").style.display = t >= 23.7 ? "block" : "none";
-        if (t >= 23.7) {
-          set($("scores"), fadeIn(t, 24.1, 0.5, 30));
-          $("scoreTo").textContent = lerp(0.35, 0.9, out3(prog(t, 24.5, 25.4))).toFixed(2);
-          set($("e1"), fadeIn(t, 25.2, 0.4, 24));
-          set($("e2"), fadeIn(t, 25.5, 0.4, 24));
-          set($("e3"), fadeIn(t, 25.8, 0.4, 24));
-          set($("e4"), fadeIn(t, 26.25, 0.4, 14));
-          set($("e5"), fadeIn(t, 26.6, 0.45, 10));
+        $("stage4").style.display = t >= 39.3 ? "block" : "none";
+        if (t >= 39.3) {
+          set($("scores"), fadeIn(t, 39.8, 0.6, 30));
+          $("scoreTo").textContent = lerp(0.35, 0.9, out3(prog(t, 40.3, 41.4))).toFixed(2);
+          set($("e1"), fadeIn(t, 41.2, 0.5, 24));
+          set($("e2"), fadeIn(t, 41.9, 0.5, 24));
+          set($("e3"), fadeIn(t, 42.6, 0.5, 24));
+          set($("e4"), fadeIn(t, 43.4, 0.5, 14));
+          set($("e5"), fadeIn(t, 43.9, 0.5, 10));
         }
       }
 
