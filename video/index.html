@@ -488,7 +488,7 @@
           const slide = out3(prog(t, 0, 1.3));
           const gather = inOut(prog(t, 1.05, 1.8));
           cards.forEach((el, i) => {
-            const base = (i - (cards.length - 1) / 2) * 230 + lerp(700, -60, slide);
+            const base = (i - (cards.length - 1) / 2) * 230 + lerp(320, -60, slide);
             const x = lerp(base, 0, gather);
             const dist = Math.min(Math.abs(x) / 1100, 1);
             set(el, {
@@ -497,7 +497,7 @@
               zIndex: String(100 - Math.round(dist * 50)),
             });
           });
-          set($("engine"), { opacity: out3(prog(t, 0.15, 0.6)) * (1 - prog(t, 1.4, 1.75)) });
+          set($("engine"), { opacity: 1 - prog(t, 1.4, 1.75) });
           const grow = out3(prog(t, 1.5, 2.3));
           const path = $("octPath");
           path.setAttribute("d", octagon(W / 2, H / 2 + 20, lerp(160, 620, grow), lerp(110, 300, grow), lerp(40, 110, grow)));
