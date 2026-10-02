@@ -186,31 +186,50 @@
         font-size: 25px;
         color: #1e1e1e;
       }
-      #caption {
+      #drawer {
         position: absolute;
         left: 50%;
-        bottom: 46px;
-        max-width: 1500px;
-        transform: translateX(-50%);
-        padding: 18px 30px;
-        border-radius: 12px;
-        background: #111111eb;
+        bottom: 0;
+        width: 1640px;
+        padding: 20px 80px 52px;
+        border-radius: 30px 30px 0 0;
+        background: #141414;
         border: 1px solid #ffffff1f;
-        font-size: 34px;
-        font-weight: 400;
-        line-height: 1.3;
-        color: #f5f7f2;
-        text-align: center;
-        white-space: nowrap;
+        border-bottom: none;
+        box-shadow: 0 -24px 80px #00000099;
       }
-      #caption b {
+      #drawer .handle {
+        width: 60px;
+        height: 5px;
+        border-radius: 3px;
+        background: #ffffff38;
+        margin: 0 auto 24px;
+      }
+      #captionBox {
+        position: relative;
+        height: 120px;
+      }
+      .caption {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        font-size: 46px;
+        font-weight: 400;
+        line-height: 1.28;
+        color: #f5f7f2;
+        text-wrap: balance;
+      }
+      .caption b {
         font-weight: 600;
       }
-      #caption code {
+      .caption code {
         font-family: "Azeret Mono", monospace;
-        font-size: 30px;
-        padding: 0 6px;
-        border-radius: 4px;
+        font-size: 40px;
+        padding: 0 8px;
+        border-radius: 6px;
         background: #ffffff1a;
       }
       #grain {
@@ -288,6 +307,8 @@
         Redesign the pricing page <span style="color: #959595; font-weight: 300">#4</span>
       </div>
 
+      <!-- the page and everything pinned to it scale together, so it all clears the caption drawer -->
+      <div id="pageGroup" class="layer" style="transform-origin: 880px 110px; transform: translateX(80px) scale(0.8)">
       <div id="browser" class="frame" style="left: 230px; top: 160px; width: 1300px">
         <div class="bar mono"><i></i><i></i><i></i><span id="url">vercel preview · dae0b57 · /pricing</span></div>
         <div style="position: relative">
@@ -316,10 +337,11 @@
       </div>
       <div id="after" class="tag mono" style="left: 230px; top: 104px">after · 43ae182</div>
       <div id="before" class="tag mono" style="right: 390px; top: 104px">before · dae0b57</div>
+      </div>
 
       <div
         id="composer"
-        style="position: absolute; left: 1180px; top: 700px; width: 620px; border-radius: 14px; background: #0d1117; border: 1px solid #30363d; padding: 22px 24px; box-shadow: 0 30px 80px #000000a0"
+        style="position: absolute; left: 1180px; top: 470px; width: 620px; border-radius: 14px; background: #0d1117; border: 1px solid #30363d; padding: 22px 24px; box-shadow: 0 30px 80px #000000a0"
       >
         <div id="composerHead" style="font-size: 18px; color: #8b949e; margin-bottom: 12px">Add a comment</div>
         <div id="typed" class="mono" style="height: 64px; border-radius: 8px; border: 1px solid #30363d; background: #010409; padding: 18px; font-size: 24px; color: #f0f6fc"></div>
@@ -355,10 +377,11 @@
       </div>
     </div>
 
-    <div id="vignette" class="layer" style="top: auto; height: 300px; background: linear-gradient(#00000000, #000000b3)"></div>
-    <div id="caption"></div>
+    <div id="scrim" class="layer" style="background: #000"></div>
+    <div id="drawer"><div class="handle"></div><div id="captionBox"></div></div>
     <div id="grain" class="layer"></div>
 
+    <script src="timeline.js"></script>
     <script>
       const W = 1920;
       const H = 1080;
@@ -377,19 +400,15 @@
       // on, then off: a window with soft edges
       const span = (t, a, b, edge = 0.35) => out3(prog(t, a, a + edge)) * (1 - prog(t, b - edge, b));
 
-      const TOTAL = 46;
-
-      // Each caption is on screen long enough to read twice.
-      const CAPTIONS = [
-        [8.5, 13.8, "Fernhill’s live site is the reference. The Taste Engine reads its brand straight from production."],
-        [14.6, 18.0, "A coding agent opens a pull request that redesigns <b>/pricing</b>. Spot the problems?"],
-        [18.2, 20.7, "Vercel deploys a preview. Anyone on the team comments <code>/taste review</code>."],
-        [20.9, 22.5, "The action sends the preview and production to the Taste Engine."],
-        [22.7, 25.5, "Same page, same brand: production scores <b>0.95</b>, the preview <b>0.35</b>."],
-        [25.7, 28.4, "Every fix comes worst first, with the exact values the agent needs."],
-        [28.8, 33.8, "The agent applies the fixes and pushes. Vercel deploys a new preview."],
-        [34.2, 39.2, "Ask again: <b>0.90</b>, up 0.55. Back on brand before it merges."],
-      ];
+      const { CAPTIONS, SCENE_TOTAL, sceneTimeOf, VIDEO_TOTAL } = TIMELINE;
+      const DRAWER = [CAPTIONS[0][0] - 0.2, CAPTIONS[CAPTIONS.length - 1][1]];
+      const captionEls = CAPTIONS.map(([, , html]) => {
+        const el = document.createElement("div");
+        el.className = "caption";
+        el.innerHTML = `<span>${html}</span>`;
+        $("captionBox").appendChild(el);
+        return el;
+      });
 
       const SWATCHES = ["#F5F7F2", "#3F6B3A", "#0000EE", "#EDE5D3", "#1E1E1E", "#FF4C24", "#F6F1E7", "#8B8B8B", "#111111", "#EAECE7", "#2F5229"];
       const LIGHT = new Set(["#F5F7F2", "#EDE5D3", "#FF4C24", "#F6F1E7", "#EAECE7"]);
@@ -426,10 +445,12 @@
       function placeShot(shot, o) {
         const scale = 1000 / o.imgW;
         const h = o.imgH * scale;
-        const states = [{ tx: (W - 1000) / 2, ty: (H - h) / 2 - 20, z: 1 }];
+        // centred in the frame above the caption drawer
+        const VIEW_CY = 430;
+        const states = [{ tx: (W - 1000) / 2, ty: Math.max(40, VIEW_CY - h / 2), z: 1 }];
         for (const f of o.focus) {
           const [x1, y1, x2, y2] = f.rect.map((v) => v * scale);
-          states.push({ tx: W / 2 - ((x1 + x2) / 2) * f.z, ty: H / 2 - 40 - ((y1 + y2) / 2) * f.z, z: f.z });
+          states.push({ tx: W / 2 - ((x1 + x2) / 2) * f.z, ty: VIEW_CY - ((y1 + y2) / 2) * f.z, z: f.z });
         }
         let cam = states[0];
         o.moves.forEach((m, i) => {
@@ -464,19 +485,16 @@
         if (t >= 39.2) clip = `inset(${(1 - end) * 100}% 0 0 0)`;
         $("paper").style.clipPath = clip;
 
-        // caption
-        const cap = CAPTIONS.find(([a, b]) => between(t, a, b));
-        const capEl = $("caption");
-        if (cap) {
-          if (capEl.dataset.key !== cap[2]) {
-            capEl.innerHTML = cap[2];
-            capEl.dataset.key = cap[2];
-          }
-          const v = span(t, cap[0], cap[1], 0.3);
-          set(capEl, { opacity: v, transform: `translateX(-50%) translateY(${(1 - out3(prog(t, cap[0], cap[0] + 0.35))) * 16}px)` });
-        } else capEl.style.opacity = 0;
-
-        $("vignette").style.opacity = span(t, 14.3, 39.3, 0.5);
+        // the caption drawer: it rises once, stays while the story is told, and its line changes in place
+        const open = inOut(prog(t, DRAWER[0], DRAWER[0] + 0.6)) * (1 - inOut(prog(t, DRAWER[1] - 0.4, DRAWER[1] + 0.2)));
+        set($("drawer"), { transform: `translateX(-50%) translateY(${(1 - open) * 110}%)`, display: open > 0.001 ? "block" : "none" });
+        $("scrim").style.opacity = open * 0.22;
+        // each line holds until the next one starts, then hands over: out first, in just after, never both
+        CAPTIONS.forEach(([a, b], i) => {
+          const next = CAPTIONS[i + 1]?.[0];
+          const v = span(t, a + 0.12, next === undefined ? b : next + 0.05, 0.22);
+          set(captionEls[i], { opacity: v, transform: `translateY(${(1 - out3(prog(t, a, a + 0.4))) * 18}px)` });
+        });
 
         // grain
         const g = Math.floor(t * 24);
@@ -562,7 +580,7 @@
           const cursorIn = inOut(prog(t, 19.9, 20.5));
           set($("cursor"), {
             left: `${lerp(1460, 1700, cursorIn)}px`,
-            top: `${lerp(600, 845, cursorIn)}px`,
+            top: `${lerp(380, 612, cursorIn)}px`,
             opacity: span(t, 19.8, 21.4, 0.2),
           });
           const pressed = between(t, 20.55, 20.75);
@@ -570,7 +588,7 @@
           const rip = prog(t, 20.6, 21.1);
           set($("ripple"), {
             left: `${1716 - rip * 40}px`,
-            top: `${854 - rip * 40}px`,
+            top: `${614 - rip * 40}px`,
             width: `${20 + rip * 80}px`,
             height: `${20 + rip * 80}px`,
             opacity: between(t, 20.6, 21.1) ? 1 - rip : 0,
@@ -632,7 +650,9 @@
       }
 
       window.seek = seek;
-      window.TOTAL = TOTAL;
+      // the renderer walks video time; each frame shows the scene at the matching scene time
+      window.seekVideo = (v) => seek(sceneTimeOf(v));
+      window.TOTAL = VIDEO_TOTAL;
       document.fonts.ready.then(() => {
         window.ready = true;
       });

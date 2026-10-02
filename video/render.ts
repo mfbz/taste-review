@@ -89,7 +89,7 @@ async function main(): Promise<void> {
   await sleep(500);
 
   const frame = async (t: number): Promise<Buffer> => {
-    await send("Runtime.evaluate", { expression: `seek(${t})` });
+    await send("Runtime.evaluate", { expression: `seekVideo(${t})` });
     const shot = await send("Page.captureScreenshot", { format: "png" });
     return Buffer.from(String(shot.data), "base64");
   };
