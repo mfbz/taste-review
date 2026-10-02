@@ -274,10 +274,10 @@
         Agents ship UI all day.
       </div>
       <div id="s2b" style="position: absolute; left: 160px; top: 455px; font-size: 104px; font-weight: 400; letter-spacing: -0.025em">
-        Nobody checks the brand.
+        Some of it drifts off brand.
       </div>
       <div id="s2c" class="mono" style="position: absolute; left: 160px; top: 660px; font-size: 34px; color: #1e1e1e">
-        The Taste Engine API can<span id="caret">_</span>
+        The Taste Engine API catches it before it merges<span id="caret">_</span>
       </div>
     </div>
 
@@ -362,13 +362,13 @@
     </div>
 
     <div id="stage4" class="layer" style="color: #1e1e1e">
-      <div id="scores" style="position: absolute; left: 160px; top: 160px; font-size: 168px; font-weight: 400; letter-spacing: -0.03em; font-variant-numeric: tabular-nums">
-        <span style="color: #959595">0.35</span><span style="color: #959595; margin: 0 40px">→</span><span id="scoreTo">0.35</span>
-      </div>
-      <div id="e1" style="position: absolute; left: 160px; top: 440px; font-size: 56px; font-weight: 400">Extract a brand from any live site.</div>
-      <div id="e2" style="position: absolute; left: 160px; top: 518px; font-size: 56px; font-weight: 400">Verify any page against it.</div>
-      <div id="e3" style="position: absolute; left: 160px; top: 596px; font-size: 56px; font-weight: 400">Fix it before it merges.</div>
-      <div id="e4" class="mono" style="position: absolute; left: 160px; top: 724px; font-size: 26px; color: #666562">
+      <div id="o1" style="position: absolute; left: 160px; top: 150px; font-size: 96px; font-weight: 400; letter-spacing: -0.025em; color: #959595">One review. One round of fixes.</div>
+      <div id="o2" style="position: absolute; left: 160px; top: 262px; font-size: 96px; font-weight: 400; letter-spacing: -0.025em">On brand before it merged.</div>
+      <div id="e0" class="mono" style="position: absolute; left: 160px; top: 470px; font-size: 22px; color: #959595">the Taste Engine API</div>
+      <div id="e1" style="position: absolute; left: 160px; top: 510px; font-size: 46px; font-weight: 400">Extract a brand from any live site.</div>
+      <div id="e2" style="position: absolute; left: 160px; top: 572px; font-size: 46px; font-weight: 400">Verify any page against it.</div>
+      <div id="e3" style="position: absolute; left: 160px; top: 634px; font-size: 46px; font-weight: 400">Hand the fixes to your agent.</div>
+      <div id="e4" class="mono" style="position: absolute; left: 160px; top: 740px; font-size: 26px; color: #666562">
         works with Vercel preview deployments · one workflow file
       </div>
       <div id="e5" class="mono" style="position: absolute; left: 160px; right: 160px; bottom: 90px; display: flex; justify-content: space-between; font-size: 24px; border-top: 1px solid #0000001a; padding-top: 30px">
@@ -639,13 +639,14 @@
         // the end card
         $("stage4").style.display = t >= 39.3 ? "block" : "none";
         if (t >= 39.3) {
-          set($("scores"), fadeIn(t, 39.8, 0.6, 30));
-          $("scoreTo").textContent = lerp(0.35, 0.9, out3(prog(t, 40.3, 41.4))).toFixed(2);
-          set($("e1"), fadeIn(t, 41.2, 0.5, 24));
-          set($("e2"), fadeIn(t, 41.9, 0.5, 24));
-          set($("e3"), fadeIn(t, 42.6, 0.5, 24));
-          set($("e4"), fadeIn(t, 43.4, 0.5, 14));
-          set($("e5"), fadeIn(t, 43.9, 0.5, 10));
+          set($("o1"), fadeIn(t, 39.8, 0.6, 30));
+          set($("o2"), fadeIn(t, 40.5, 0.6, 30));
+          set($("e0"), fadeIn(t, 41.5, 0.5, 14));
+          set($("e1"), fadeIn(t, 41.8, 0.5, 20));
+          set($("e2"), fadeIn(t, 42.4, 0.5, 20));
+          set($("e3"), fadeIn(t, 43.0, 0.5, 20));
+          set($("e4"), fadeIn(t, 43.7, 0.5, 14));
+          set($("e5"), fadeIn(t, 44.1, 0.5, 10));
         }
       }
 

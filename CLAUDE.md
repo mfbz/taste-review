@@ -10,7 +10,7 @@ npm workspaces, two parts:
 
 - `action/`: the GitHub Action. `action.yml` sits at the repository root because GitHub requires it there; its entry point is the committed bundle in `action/dist/`, rebuilt by `npm run build -w action` and checked in CI against the source.
 - `site/`: the landing page. Next.js App Router, static export, shadcn/ui on Tailwind 4, Phosphor icons. Its design system is in `site/DESIGN.md`.
-- `video/`: the demo video, not a workspace: its own install, `timeline.js` (the captions and the slow-downs, shared by everything else), `index.html` (every frame a pure function of scene time), `render.ts` (headless Chrome into ffmpeg, walking video time) and `score.ts` (the synthesized piano and strings, its cues placed through the same timeline); `npm run video` builds all three into `out/taste-review-final.mp4`. Output goes to `video/out/`, gitignored.
+- `video/`: the demo video, not a workspace: its own install, `timeline.js` (the captions and the slow-downs, shared by everything else), `index.html` (every frame a pure function of scene time), `render.ts` (headless Chrome into ffmpeg, walking video time) and `score.ts` (the synthesized 120 BPM score, its bar grid aligned to the drop through the same timeline); `npm run video` builds all three into `out/taste-review-final.mp4`. Output goes to `video/out/`, gitignored.
 - `scripts/`: one-off tools run by hand (`extract-brand.ts`). Typechecked, never run in CI or a build.
 
 Nothing crosses between `action/` and `site/`. If both need a fact, it is written once in each and kept in step.
