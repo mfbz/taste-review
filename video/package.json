@@ -3,7 +3,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "render": "node render.ts"
+    "render": "node render.ts",
+    "score": "node score.ts",
+    "mux": "ffmpeg -v error -y -i out/taste-review.mp4 -i out/score.wav -map 0:v:0 -map 1:a:0 -c:v copy -c:a aac -b:a 192k -ar 48000 -shortest -movflags +faststart out/taste-review-final.mp4",
+    "video": "npm run render && npm run score && npm run mux"
   },
   "dependencies": {
     "@fontsource-variable/figtree": "^5.3.0",
