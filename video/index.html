@@ -442,14 +442,14 @@
           if (!f.hl) return;
           const [x1, y1, x2, y2] = f.rect.map((v) => v * scale);
           const pad = 10;
-          const pulse = 0.5 + 0.5 * Math.sin(o.t * 6);
+          
           set(f.hl, {
             left: `${cam.tx + (x1 - pad) * cam.z}px`,
             top: `${cam.ty + (1 - o.enter) * 500 + (y1 - pad) * cam.z}px`,
             width: `${(x2 - x1 + pad * 2) * cam.z}px`,
             height: `${(y2 - y1 + pad * 2) * cam.z}px`,
             opacity: visible * f.outline,
-            boxShadow: `0 0 ${16 + pulse * 20}px ${f.hl.style.borderColor}`,
+            boxShadow: `0 0 18px ${f.hl.style.borderColor}66`,
           });
         });
       }
